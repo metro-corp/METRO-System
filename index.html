@@ -63,7 +63,7 @@
 
 <header>
     <img src="logo.png" alt="METRO" style="height: 24px;" onerror="this.src='https://via.placeholder.com/100x30?text=METRO+R%26S'">
-    <span>(주)METRO 현장관리 시스템 V19.0</span>
+    <span>(주)METRO 현장관리 시스템 V19.4</span>
     <span class="setting-icon" onclick="toggleConfig()">⚙️</span>
 </header>
 
@@ -124,7 +124,7 @@
         } catch (e) { select.innerHTML = '<option value="">⛔ 서버 연결 실패</option>'; }
     }
 
-// [최적화] 공종/유형 제외, 상세 내용(Desc)을 최대한 길게 표시
+// [V19.4] 왼쪽 정렬 및 가로 폭 맞춤 말줄임 처리
 function searchByUnit() {
     const sheet = document.getElementById('db-sheet').value;
     const dong = document.getElementById('dong').value.trim();
@@ -137,16 +137,25 @@ function searchByUnit() {
     const matches = list.filter(item => String(item.dong) === dong && String(item.ho) === ho);
 
     if (matches.length > 0) {
-        resultDiv.innerHTML = `<div style="padding:10px; background:#f8f9fa; font-size:12px; color:#666; border-bottom:1px solid #ddd;">🔍 해당 호실 내역 ${matches.length}건 (클릭 시 자동 입력)</div>`;
+        resultDiv.innerHTML = `<div style="padding:10px; background:#f8f9fa; font-size:12px; color:#666; border-bottom:1px solid #ddd; text-align:left;">🔍 해당 호실 내역 ${matches.length}건</div>`;
         matches.forEach(item => {
-            // 상세 내용을 최대 100자까지 대폭 늘려서 표시
-            const fullDesc = item.desc ? (item.desc.length > 100 ? item.desc.substring(0, 100) + "..." : item.desc) : "상세 내용 없음";
+            // 상세 내용 (내용이 없으면 '내용 없음' 표시)
+            const descText = item.desc || "상세 내용 없음";
             
             resultDiv.innerHTML += `
-                <div class="result-item" onclick='fillData(${JSON.stringify(item).replace(/'/g, "&apos;")})' style="border-bottom: 1px solid #eee; padding: 15px;">
-                    <b style="color: #3498db; font-size: 14px; display: block; margin-bottom: 5px;">📍 위치: ${item.loc || '위치 미지정'}</b>
-                    <div style="color: #333; font-size: 14px; line-height: 1.6; white-space: pre-wrap; word-break: break-all;">
-                        📝 ${fullDesc}
+                <div class="result-item" onclick='fillData(${JSON.stringify(item).replace(/'/g, "&apos;")})' 
+                     style="border-bottom: 1px solid #eee; padding: 12px; text-align: left;">
+                    <b style="color: #3498db; font-size: 14px; display: block; margin-bottom: 4px;">📍 ${item.loc || '위치 미지정'}</b>
+                    <div style="
+                        color: #333; 
+                        font-size: 13.5px; 
+                        white-space: nowrap; 
+                        overflow: hidden; 
+                        text-overflow: ellipsis; 
+                        width: 100%;
+                        display: block;
+                    ">
+                        📝 ${descText}
                     </div>
                 </div>`;
         });
