@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>(주)METRO R&S 통합 관리 V21.0</title>
+    <title>(주)METRO R&S 통합 관리 V21.3</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root { --primary: #1e272e; --accent: #3498db; --success: #27ae60; --pdf: #e74c3c; --highlight: #e8f6f3; --share: #9b59b6; }
@@ -38,7 +38,7 @@
 <header>
     <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
         <img src="logo.png" alt="METRO" style="height: 24px;" onerror="this.src='https://via.placeholder.com/100x30?text=METRO+R%26S'">
-        <span>통합 관리 시스템 V21.0</span>
+        <span>통합 관리 시스템 V21.3</span>
     </div>
 </header>
 
@@ -98,7 +98,7 @@
 </div>
 
 <script>
-    // 🌟 [필수] 현재 정상 작동 중인 웹 앱 URL을 그대로 붙여넣어 주세요!
+    // 🌟 [필수] 방금 2단계에서 새로 발급받은 배포 URL을 넣어주세요!
     const MY_GAS_URL = "https://script.google.com/macros/s/AKfycbw35AKk0QgqhYoMvhcjRq52SEt3AuuTMM7xg22fCPJEN-GlgYhM63LAeC7FauHxNAK6/exec"; 
     
     let cloudDB = {}; let currentSid = ""; let savedList = [];
@@ -108,32 +108,34 @@
     async function getSites() {
         const s = document.getElementById('site-select');
         try {
-            const r = await fetch(`${MY_GAS_URL}?mode=getSites`);
+            const r = await fetch(`${MY_GAS_URL}?mode=getSites&t=${new Date().getTime()}`);
             const j = await r.json();
             if(j.result==='success') {
-                s.innerHTML = '<option value="">🏢 현장을 선택하세요</option>';
+                // 💡 만약 데이터가 없으면 0개라고 표시하여 문제를 즉시 파악하게 합니다!
+                s.innerHTML = `<option value="">🏢 현장을 선택하세요 (불러온 현장: ${j.sites.length}개)</option>`;
                 j.sites.forEach(v => s.innerHTML += `<option value="${v.id}">${v.name}</option>`);
             } else { throw new Error(j.message); }
-        } catch(e) { s.innerHTML = '<option value="">❌ 1단계 로드 실패</option>'; }
+        } catch(e) { 
+            s.innerHTML = '<option value="">❌ 로드 실패 (로그인/권한 확인)</option>'; 
+            alert("목록 불러오기 실패 원인:\n" + e.message); 
+        }
     }
 
-    // 🔥 2단계 에러 추적기를 달아둔 곳입니다.
     async function loadDB() {
         const s = document.getElementById('site-select'); currentSid = s.value; if(!currentSid) return;
         document.getElementById('site').value = s.options[s.selectedIndex].text;
         const d = document.getElementById('db-sheet'); d.innerHTML = '<option value="">⏳ 데이터 로딩 중...</option>';
         try {
-            const r = await fetch(`${MY_GAS_URL}?sid=${encodeURIComponent(currentSid)}`);
+            // 이제 currentSid는 암호같은 ID가 아니라 'https://...' 형태의 URL입니다!
+            const r = await fetch(`${MY_GAS_URL}?sid=${encodeURIComponent(currentSid)}&t=${new Date().getTime()}`);
             const j = await r.json();
             if(j.result==='success') {
                 cloudDB = j.data; d.innerHTML = '<option value="">📑 공종 선택</option>';
                 Object.keys(cloudDB).forEach(n => d.innerHTML += `<option value="${n}">${n}</option>`);
-            } else {
-                throw new Error(j.message); // 서버에서 에러를 보내면 팝업으로 던집니다.
-            }
+            } else { throw new Error(j.message); }
         } catch(e) { 
             d.innerHTML = '<option value="">❌ 2단계 로드 실패</option>'; 
-            alert("🚨 2단계 공종 DB 로드 실패 원인:\n\n" + e.message); // 화면에 에러 원인 팝업 띄우기
+            alert("🚨 2단계 공종 DB 로드 실패 원인:\n" + e.message); 
         }
     }
 
