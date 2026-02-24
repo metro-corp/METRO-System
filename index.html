@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>(주)METRO R&S 통합 시스템 V20.4</title>
+    <title>(주)METRO R&S 통합 관리 V20.6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root { --primary: #1e272e; --accent: #3498db; --success: #27ae60; --pdf: #e74c3c; --highlight: #e8f6f3; --share: #9b59b6; }
@@ -15,7 +15,7 @@
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .full { grid-column: span 2; }
         input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        #site-select { background: #e8f8f5; border: 2px solid var(--success); font-weight: bold; }
+        #site-select { background: #e8f8f5; border: 2px solid var(--success); font-weight: bold; color: #1e272e; }
         #db-sheet { background: var(--highlight); border: 2px solid var(--accent); font-weight: bold; }
         #search-results { display: none; background: #fff; border: 2px solid var(--accent); border-radius: 6px; margin-top: -5px; margin-bottom: 15px; grid-column: span 2; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-height: 250px; overflow-y: auto; }
         .result-item { padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; text-align: left; }
@@ -27,7 +27,7 @@
         button { padding: 15px; border: none; border-radius: 6px; color: white; font-weight: bold; cursor: pointer; font-size: 15px; transition: 0.3s; }
         .btn-save { background: var(--success); flex: 1; }
         .btn-send { background: var(--share); flex: 2; }
-        table { width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed; margin-top: 10px; }
         th, td { border-bottom: 1px solid #eee; padding: 10px 4px; text-align: center; }
         th { background: #f8f9fa; }
         #pdf-template { display: none; width: 794px; padding: 40px; background: white; font-family: 'Malgun Gothic'; }
@@ -38,7 +38,7 @@
 <header>
     <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
         <img src="logo.png" alt="METRO" style="height: 24px;" onerror="this.src='https://via.placeholder.com/100x30?text=METRO+R%26S'">
-        <span>통합 관리 시스템 V20.4</span>
+        <span>통합 관리 시스템 V20.6</span>
     </div>
 </header>
 
@@ -98,8 +98,9 @@
 </div>
 
 <script>
-    // 🌟 [필수] 여기에 발급받은 '새 배포 URL'을 넣으세요!
+    // 🌟 [필수] 여기에 발급받은 '새 배포 URL'을 정확히 넣으세요!
     const MY_GAS_URL = "https://script.google.com/macros/s/AKfycbzN0LkTaMKgrXY6dRuSPPRHRZfVH_r5xSYXLZ81wFnHJRGbW-nmnAIMN6vQ77lfiV0D/exec"; 
+    
     let cloudDB = {}; let currentSid = ""; let savedList = [];
 
     window.onload = () => { getSites(); document.getElementById('today-date').value = new Date().toISOString().substring(0, 10); };
@@ -108,12 +109,21 @@
         const s = document.getElementById('site-select');
         try {
             const r = await fetch(`${MY_GAS_URL}?mode=getSites`);
-            const j = await r.json();
+            const text = await r.text(); // 오류 메시지를 텍스트로 먼저 받기
+            
+            let j;
+            try { j = JSON.parse(text); } 
+            catch(err) { throw new Error("서버가 데이터 대신 다음 화면을 보냈습니다: " + text.substring(0, 50)); }
+
             if(j.result==='success') {
                 s.innerHTML = '<option value="">🏢 현장을 선택하세요</option>';
                 j.sites.forEach(v => s.innerHTML += `<option value="${v.id}">${v.name}</option>`);
             } else { throw new Error(j.message); }
-        } catch(e) { s.innerHTML = '<option value="">❌ 로드 실패 (공유 설정 확인)</option>'; console.error(e); }
+        } catch(e) { 
+            s.innerHTML = '<option value="">❌ 로드 실패 (로그인/주소 확인)</option>'; 
+            alert("목록 불러오기 실패 원인:\n" + e.message); 
+            console.error(e);
+        }
     }
 
     async function loadDB() {
@@ -127,7 +137,7 @@
                 cloudDB = j.data; d.innerHTML = '<option value="">📑 공종 선택</option>';
                 Object.keys(cloudDB).forEach(n => d.innerHTML += `<option value="${n}">${n}</option>`);
             }
-        } catch(e) { d.innerHTML = '<option value="">❌ 로드 실패</option>'; console.error(e); }
+        } catch(e) { d.innerHTML = '<option value="">❌ 로드 실패</option>'; }
     }
 
     function search() {
@@ -205,7 +215,7 @@
             const r = await fetch(MY_GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
             const j = await r.json();
             if(j.result==='success') { alert("✅ 전송 완료!"); location.reload(); }
-        } catch(e) { alert("❌ 전송 실패"); btn.disabled = false; btn.innerText = "🚀 최종 전송"; console.error(e); }
+        } catch(e) { alert("❌ 전송 실패"); btn.disabled = false; btn.innerText = "🚀 최종 전송"; }
     }
     function clearInputs() { ['dong','ho','loc','work','type','contractor','desc'].forEach(id => document.getElementById(id).value=''); [1,2,3].forEach(i => { document.getElementById('p'+i).style.display='none'; document.getElementById('t'+i).style.display='block'; document.getElementById('p'+i).src=''; }); }
 </script>
