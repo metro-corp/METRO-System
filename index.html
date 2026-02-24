@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>(주)METRO R&S 현장관리 시스템</title>
+  <style>
+    body { font-family: 'Malgun Gothic', sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
+    .container { max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    h2 { text-align: center; color: #2c3e50; font-size: 1.2rem; }
+    label { font-weight: bold; margin-top: 10px; display: block; font-size: 0.9rem; }
+    input, select, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+    button { width: 100%; padding: 15px; margin-top: 20px; background-color: #27ae60; color: white; border: none; border-radius: 5px; font-size: 1rem; font-weight: bold; cursor: pointer; }
+    button:disabled { background-color: #95a5a6; }
+    #statusMessage { text-align: center; margin-top: 15px; font-weight: bold; color: #e74c3c; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>⚙️ (주)METRO R&S 현장관리 시스템 V18.2</h2>
+  
+  <form id="reportForm">
+    <label>날짜 (Date)</label>
+    <input type="date" id="date" required>
+    
+    <label>작업번호 (No)</label>
+    <input type="text" id="no" placeholder="예: 1" required>
+    
+    <label>현장명 (Site)</label>
+    <input type="text" id="site" placeholder="예: 군산 미장동 제일풍경채" required>
+    
+    <div style="display: flex; gap: 10px;">
+      <div style="flex: 1;">
+        <label>동 (Dong)</label>
+        <input type="text" id="dong" placeholder="예: 101" required>
+      </div>
+      <div style="flex: 1;">
+        <label>호 (Ho)</label>
+        <input type="text" id="ho" placeholder="예: 502" required>
+      </div>
+    </div>
+
+    <label>위치 (Loc)</label>
+    <input type="text" id="loc" placeholder="예: 부부욕실" required>
+
+    <label>공종 (Work)</label>
+    <input type="text" id="work" placeholder="예: 방수" required>
+
+    <label>유형 (Type)</label>
+    <input type="text" id="type" placeholder="예: 누수" required>
+
+    <label>시공사 (Contractor)</label>
+    <input type="text" id="contractor" value="메트로 알엔에스" required>
+
+    <label>특이사항 (Desc)</label>
+    <textarea id="desc" rows="2" placeholder="작업 내용을 간단히 적어주세요"></textarea>
+
+    <label>📷 완료확인서 (사진 첨부)</label>
+    <input type="file" id="certFile" accept="image/*">
+
+    <label>📄 보고서 (PDF 첨부 - 선택)</label>
+    <input type="file" id="pdfFile" accept="application/pdf">
+
+    <button type="button" id="submitBtn" onclick="submitData()">🚀 서버로 전송하기</button>
+    <div id="statusMessage"></div>
+  </form>
+</div>
+
+<script>
+  // 🌟 [매우 중요] 여기에 방금 발급받은 '새 구글 웹 앱 URL'을 붙여넣으세요!
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyFvxP7hkH9Tgp11rhCh4PNH88C0_c0tZCO0fVhwBH9UnQYq_2PhK_r8NlCdGletPnDWw/exec";
+
+  // 파일을 Base64 데이터로 변환해주는 함수
+  function getBase64(file) {
+    return new Promise((resolve, reject) => {
+      if (!file) { resolve(""); return; }
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result.split(',')[1]); 
+      reader.onerror = error => reject(error);
+    });
+  }
+
+  async function submitData() {
+    const btn = document.getElementById("submitBtn");
+    const statusMsg = document.getElementById("statusMessage");
+    
+    if (WEB_APP_URL === "여기에_새로운_구글스크립트_주소_입력") {
+      alert("⚠️ 코드 수정 필요: 구글 스크립트 주소(WEB_APP_URL)를 먼저 입력해 주세요!");
+      return;
+    }
+
+    // 버튼 비활성화 및 메시지 표시
+    btn.disabled = true;
+    btn.innerText = "⏳ 드라이브 저장 중... (약 5초 소요)";
+    statusMsg.innerText = "";
+    statusMsg.style.color = "#2980b9";
+
+    try {
+      // 1. 첨부파일 가져오기
+      const certFile = document.getElementById("certFile").files[0];
+      const pdfFile = document.getElementById("pdfFile").files[0];
+
+      // 2. 파일을 구글로 보낼 수 있게 Base64 텍스트로 변환
+      const certBase64 = await getBase64(certFile);
+      const pdfBase64 = await getBase64(pdfFile);
+      const certName = certFile ? certFile.name : '완료확인서.jpg';
+
+      // 3. 서버로 보낼 데이터 묶음 만들기 (구글 앱스 스크립트 포맷에 100% 맞춤)
+      const requestData = {
+        record: {
+          date: document.getElementById("date").value,
+          no: document.getElementById("no").value,
+          site: document.getElementById("site").value,
+          dong: document.getElementById("dong").value,
+          ho: document.getElementById("ho").value,
+          loc: document.getElementById("loc").value,
+          work: document.getElementById("work").value,
+          type: document.getElementById("type").value,
+          contractor: document.getElementById("contractor").value,
+          desc: document.getElementById("desc").value
+        },
+        certBase64: certBase64,
+        pdfBase64: pdfBase64,
+        certName: certName
+      };
+
+      // 4. 구글 서버로 발사!
+      const response = await fetch(WEB_APP_URL, {
+        method: "POST",
+        body: JSON.stringify(requestData)
+      });
+
+      const result = await response.json();
+
+      if (result.result === "success") {
+        statusMsg.style.color = "#27ae60";
+        statusMsg.innerText = "✅ 기록 완료 (드라이브 저장 성공!)";
+        document.getElementById("reportForm").reset(); // 전송 후 양식 초기화
+      } else {
+        throw new Error(result.message);
+      }
+
+    } catch (error) {
+      statusMsg.style.color = "#e74c3c";
+      statusMsg.innerText = "❌ 전송 실패: 담당자에게 문의해 주세요.";
+      console.error(error);
+    } finally {
+      // 버튼 다시 활성화
+      btn.disabled = false;
+      btn.innerText = "🚀 서버로 전송하기";
+    }
+  }
+</script>
+
+</body>
+</html>
