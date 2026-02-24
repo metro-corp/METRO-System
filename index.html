@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>METRO R&S 현장관리 시스템 V19.0</title>
+    <title>METRO R&S 스마트 현장관리 시스템</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root { --primary: #1e272e; --accent: #3498db; --success: #27ae60; --pdf: #e74c3c; --highlight: #e8f6f3; --share: #9b59b6; }
@@ -63,7 +63,7 @@
 
 <header>
     <img src="logo.png" alt="METRO" style="height: 24px;" onerror="this.src='https://via.placeholder.com/100x30?text=METRO+R%26S'">
-    <span>현장관리 시스템 V19.0</span>
+    <span>(주)METRO 현장관리 시스템 V19.0</span>
     <span class="setting-icon" onclick="toggleConfig()">⚙️</span>
 </header>
 
@@ -124,31 +124,37 @@
         } catch (e) { select.innerHTML = '<option value="">⛔ 서버 연결 실패</option>'; }
     }
 
-    // [핵심] 동/호수로 데이터 찾기 및 중복 내역 표시
-    function searchByUnit() {
-        const sheet = document.getElementById('db-sheet').value;
-        const dong = document.getElementById('dong').value.trim();
-        const ho = document.getElementById('ho').value.trim();
-        const resultDiv = document.getElementById('search-results');
-        
-        if (!sheet || !dong || !ho) { resultDiv.style.display = 'none'; return; }
+// [최적화] 공종/유형 제외, 상세 내용(Desc)을 최대한 길게 표시
+function searchByUnit() {
+    const sheet = document.getElementById('db-sheet').value;
+    const dong = document.getElementById('dong').value.trim();
+    const ho = document.getElementById('ho').value.trim();
+    const resultDiv = document.getElementById('search-results');
+    
+    if (!sheet || !dong || !ho) { resultDiv.style.display = 'none'; return; }
 
-        const list = cloudDB[sheet] || [];
-        const matches = list.filter(item => String(item.dong) === dong && String(item.ho) === ho);
+    const list = cloudDB[sheet] || [];
+    const matches = list.filter(item => String(item.dong) === dong && String(item.ho) === ho);
 
-        if (matches.length > 0) {
-            resultDiv.innerHTML = `<div style="padding:8px; background:#eee; font-size:12px;">검색 결과 ${matches.length}건 (클릭 시 자동 입력)</div>`;
-            matches.forEach(item => {
-                resultDiv.innerHTML += `
-                    <div class="result-item" onclick='fillData(${JSON.stringify(item).replace(/'/g, "&apos;")})'>
-                        <b>[${item.loc}]</b> ${item.work} - ${item.type} (${item.desc.substring(0,15)}...)
-                    </div>`;
-            });
-            resultDiv.style.display = 'block';
-        } else {
-            resultDiv.style.display = 'none';
-        }
+    if (matches.length > 0) {
+        resultDiv.innerHTML = `<div style="padding:10px; background:#f8f9fa; font-size:12px; color:#666; border-bottom:1px solid #ddd;">🔍 해당 호실 내역 ${matches.length}건 (클릭 시 자동 입력)</div>`;
+        matches.forEach(item => {
+            // 상세 내용을 최대 100자까지 대폭 늘려서 표시
+            const fullDesc = item.desc ? (item.desc.length > 100 ? item.desc.substring(0, 100) + "..." : item.desc) : "상세 내용 없음";
+            
+            resultDiv.innerHTML += `
+                <div class="result-item" onclick='fillData(${JSON.stringify(item).replace(/'/g, "&apos;")})' style="border-bottom: 1px solid #eee; padding: 15px;">
+                    <b style="color: #3498db; font-size: 14px; display: block; margin-bottom: 5px;">📍 위치: ${item.loc || '위치 미지정'}</b>
+                    <div style="color: #333; font-size: 14px; line-height: 1.6; white-space: pre-wrap; word-break: break-all;">
+                        📝 ${fullDesc}
+                    </div>
+                </div>`;
+        });
+        resultDiv.style.display = 'block';
+    } else {
+        resultDiv.style.display = 'none';
     }
+}
 
     function fillData(item) {
         const fields = ['no', 'site', 'loc', 'work', 'type', 'contractor', 'desc'];
