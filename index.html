@@ -1,217 +1,440 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>(주)METRO R&S 현장관리 시스템 V18.9</title>
-  <style>
-    :root {
-      --primary-blue: #3498db;
-      --primary-yellow: #f39c12;
-      --primary-green: #2ecc71;
-      --primary-purple: #9b59b6;
-      --bg-color: #f4f7f6;
-    }
-    body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; background-color: var(--bg-color); margin: 0; padding: 0; color: #333; }
-    
-    /* 상단 헤더 */
-    .header { background-color: #2c3e50; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; font-size: 1.1rem; font-weight: bold; position: sticky; top: 0; z-index: 100; }
-    .header .title { display: flex; align-items: center; gap: 8px; }
-    
-    .container { max-width: 600px; margin: 15px auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-    
-    /* 섹션 제목 */
-    .section-title { color: var(--primary-blue); font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; display: flex; align-items: center; gap: 5px; }
-    
-    /* 입력 폼 공통 */
-    input, select, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 0.95rem; }
-    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary-blue); }
-    
-    /* 특별한 입력 폼 테두리 색상 */
-    .input-yellow { border: 2px solid #f1c40f; color: #d35400; font-weight: bold; }
-    .input-blue { border: 2px solid var(--primary-blue); }
-    
-    /* 그리드 레이아웃 (반반 나누기) */
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    
-    /* 사진 첨부 박스 */
-    .photo-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-    .photo-box { border: 2px dashed #bdc3c7; border-radius: 8px; padding: 20px 0; text-align: center; cursor: pointer; color: #7f8c8d; font-size: 0.85rem; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #fafafa; transition: 0.2s; }
-    .photo-box:hover { background-color: #f1f2f6; }
-    .photo-box.active { border-color: var(--primary-green); color: var(--primary-green); border-style: solid; background-color: #e8f8f5; }
-    .photo-box input[type="file"] { display: none; }
-    
-    /* 버튼 */
-    .btn-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; margin-top: 10px; }
-    .btn { padding: 15px; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; color: white; cursor: pointer; text-align: center; transition: 0.2s; }
-    .btn-green { background-color: var(--primary-green); }
-    .btn-purple { background-color: var(--primary-purple); }
-    .btn:active { transform: scale(0.98); }
-    .btn:disabled { background-color: #95a5a6; cursor: not-allowed; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>METRO R&S 현장관리 시스템</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root { --primary: #1e272e; --accent: #3498db; --success: #27ae60; --pdf: #e74c3c; --highlight: #e8f6f3; --share: #9b59b6; }
+        body { font-family: 'Pretendard', sans-serif; margin: 0; background: #f0f2f5; font-size: 14px; color: #333; padding-bottom: 50px; }
+        
+        header { background: var(--primary); color: white; padding: 15px 40px 15px 15px; font-weight: bold; position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        header span { font-size: 15px; } 
+        .setting-icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 20px; cursor: pointer; transition: 0.2s; padding: 5px; opacity: 0.8; }
+        .setting-icon:active { opacity: 0.4; }
+        
+        .container { padding: 10px; max-width: 800px; margin: auto; }
+        .section { background: white; padding: 15px; border-radius: 8px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .section-title { font-weight: bold; color: var(--accent); margin-bottom: 12px; border-left: 4px solid var(--accent); padding-left: 8px; font-size: 15px; }
+        
+        #config-section { display: none; border: 2px solid #eee; background-color: #fafafa; }
+        
+        .grid-input { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        #today-date { grid-column: span 2; background-color: #fff9e6; border: 1px solid #ffd32a; font-weight: bold; color: #d35400; }
+        #db-sheet { grid-column: span 2; background-color: var(--highlight); border: 2px solid var(--accent); font-weight: bold; font-size: 15px; color: var(--primary); }
+        #no { grid-column: span 2; border: 2px solid var(--accent); font-weight: bold; font-size: 16px; text-align: center; }
+        #site, #desc { grid-column: span 2; }
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+        .filled { background-color: var(--highlight); border-color: var(--success); } 
+        
+        .photo-area { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 15px; }
+        .photo-box { background: #f8f9fa; height: 100px; display: flex; align-items: center; justify-content: center; border: 2px dashed #cfd8dc; border-radius: 8px; cursor: pointer; position: relative; overflow: hidden; }
+        .photo-box span { font-size: 12px; color: #546e7a; font-weight: bold; text-align: center; }
+        .preview-img { width: 100%; height: 100%; object-fit: cover; display: none; position: absolute; top: 0; left: 0; }
+        
+        .btn-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+        button { padding: 14px; border: none; border-radius: 6px; color: white; font-weight: bold; cursor: pointer; font-size: 15px; transition: 0.3s; }
+        .btn-save { background: var(--success); flex: 1; min-width: 100px; }
+        .btn-send { background: var(--share); flex: 2; font-size: 16px; } 
+        .btn-sync { background: #2980b9; width: 100%; margin-top: 10px; font-size: 14px; }
+        
+        #search-box { width: 100%; border: 2px solid var(--accent); margin-bottom: 10px; padding: 10px; border-radius: 6px; }
+        
+        .table-wrapper { overflow-x: hidden; border-radius: 6px; border: 1px solid #eee; }
+        table { width: 100%; border-collapse: collapse; background: white; font-size: 12px; table-layout: fixed; } 
+        th, td { border-bottom: 1px solid #eee; padding: 8px 4px; text-align: center; word-break: break-word; } 
+        th:nth-child(1) { width: 12%; } 
+        th:nth-child(2) { width: 43%; } 
+        th:nth-child(3) { width: 25%; } 
+        th:nth-child(4) { width: 20%; } 
+        th { background: #f8f9fa; font-weight: bold; }
 
-    #statusMessage { text-align: center; margin-top: 15px; font-weight: bold; font-size: 0.95rem; }
-  </style>
+        #pdf-template { 
+            display: none; width: 794px; height: 1122px; padding: 20px 40px; 
+            background: white; font-family: 'Malgun Gothic', sans-serif; box-sizing: border-box; 
+        }
+        #pdf-template h1 { text-align: center; color: #1e272e; margin: 0 0 15px 0; font-size: 24px; border-bottom: 2px solid #333; padding-bottom: 10px; }
+        #pdf-template table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+        #pdf-template th, #pdf-template td { border: 1px solid #333; padding: 8px; text-align: center; font-size: 14px; }
+        #pdf-template .label { background: #f2f2f2; font-weight: bold; width: 20%; }
+        
+        .pdf-photo-grid { display: flex; flex-direction: column; gap: 15px; }
+        .pdf-photo-item { width: 100%; text-align: center; }
+        .pdf-photo-item p { margin: 0 0 5px 0; font-weight: bold; font-size: 15px; }
+        .pdf-photo-item img { height: 330px; width: auto; max-width: 100%; border: 2px solid #ddd; background: #fafafa; margin: 0 auto; display: block; }
+    </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="title"><span>🌀</span> (주)METRO R&S 현장관리 시스템 V18.9</div>
-  <span>⚙️</span>
-</div>
+<header>
+    <img src="logo.png" alt="로고" style="height: 24px; object-fit: contain;" onerror="this.style.display='none'">
+    <span>(주)METRO R&S 현장관리 시스템 V18.9</span>
+    <span class="setting-icon" onclick="toggleConfig()" title="설정 열기/닫기">⚙️</span>
+</header>
 
 <div class="container">
-  <div class="section-title">✏️ 현장 작업 기록</div>
-  
-  <form id="reportForm">
-    <input type="date" id="date" class="input-yellow" required>
-    
-    <select id="work_category" class="input-blue">
-      <option value="">📑 공종을 선택하세요</option>
-      <option value="방수">방수</option>
-      <option value="타일">타일</option>
-      <option value="설비">설비</option>
-      <option value="기타">기타</option>
-    </select>
-    
-    <input type="text" id="no" class="input-blue" placeholder="🔍 관리 번호 입력" style="text-align: center;" required>
-    
-    <input type="text" id="site" placeholder="현장명" required>
-    
-    <div class="grid-2">
-      <input type="text" id="dong" placeholder="동" required>
-      <input type="text" id="ho" placeholder="호" required>
-    </div>
-    
-    <div class="grid-2">
-      <input type="text" id="loc" placeholder="위치" required>
-      <input type="text" id="work" placeholder="공종 (상세)" required>
-    </div>
-    
-    <div class="grid-2">
-      <input type="text" id="type" placeholder="하자 유형" required>
-      <input type="text" id="contractor" placeholder="시공업체">
-    </div>
-    
-    <textarea id="desc" rows="3" placeholder="하자 내용 설명"></textarea>
-
-    <div class="photo-grid">
-      <label class="photo-box" id="box-before">
-        작업 전📷
-        <input type="file" id="img-before" accept="image/*" onchange="checkFile(this, 'box-before')">
-      </label>
-      <label class="photo-box" id="box-after">
-        작업 후📷
-        <input type="file" id="img-after" accept="image/*" onchange="checkFile(this, 'box-after')">
-      </label>
-      <label class="photo-box" id="box-cert">
-        완료확인서📋
-        <input type="file" id="img-cert" accept="image/*" onchange="checkFile(this, 'box-cert')">
-      </label>
+    <div id="config-section" class="section">
+        <div class="section-title">☁️ 클라우드 DB 연동</div>
+        <button class="btn-sync" onclick="fetchCloudDB()">🔄 구글 시트 최신버전 수동 동기화</button>
     </div>
 
-    <div class="btn-grid">
-      <button type="button" class="btn btn-green">임시 저장</button>
-      <button type="button" id="submitBtn" class="btn btn-purple" onclick="submitData()">최종 전송 (시트+드라이브)</button>
+    <div class="section">
+        <div class="section-title">✏️ 현장 작업 기록</div>
+        <div class="grid-input">
+            <input type="date" id="today-date">
+            <select id="db-sheet" onchange="clearFormButKeepSheet()">
+                <option value="">⏳ 앱을 켜면 구글 시트를 자동으로 불러옵니다...</option>
+            </select>
+            <input type="number" id="no" placeholder="🔍 관리 번호 입력" oninput="searchAndFill(this.value)">
+            <input type="text" id="site" placeholder="현장명">
+            <input type="text" id="dong" placeholder="동">
+            <input type="text" id="ho" placeholder="호">
+            <input type="text" id="loc" placeholder="위치">
+            <input type="text" id="work" placeholder="공종">
+            <input type="text" id="type" placeholder="하자 유형">
+            <input type="text" id="contractor" placeholder="시공업체">
+            <textarea id="desc" placeholder="하자 내용 설명"></textarea>
+        </div>
+        
+        <div class="photo-area">
+            <div class="photo-box" onclick="document.getElementById('f1').click()"><span id="t1">작업 전📷</span><img id="p1" class="preview-img"><input type="file" id="f1" hidden accept="image/*" capture="environment" onchange="view(this,'p1','t1')"></div>
+            <div class="photo-box" onclick="document.getElementById('f2').click()"><span id="t2">작업 후📷</span><img id="p2" class="preview-img"><input type="file" id="f2" hidden accept="image/*" capture="environment" onchange="view(this,'p2','t2')"></div>
+            <div class="photo-box" onclick="document.getElementById('f3').click()"><span id="t3">완료확인서📋</span><img id="p3" class="preview-img"><input type="file" id="f3" hidden accept="image/*" onchange="view(this,'p3','t3')"></div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-save" onclick="saveLocal()">임시 저장</button>
+            <button class="btn-send" onclick="sendToGoogleServer()">최종 전송 (시트+드라이브)</button>
+        </div>
     </div>
-    <div id="statusMessage"></div>
-  </form>
+
+    <div class="section">
+        <div class="section-title">📋 작업 완료 목록 (<span id="count">0</span>건)</div>
+        <div class="table-wrapper">
+            <table id="list-table">
+                <thead><tr><th>No</th><th>현장/동/호</th><th>공종/유형</th><th>관리</th></tr></thead>
+                <tbody id="list-body">
+                    <tr><td colspan="4" style="color:#999; padding:20px;">저장된 작업이 없습니다.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="pdf-template">
+    <h1>하자보수 작업 완료 사진대지</h1>
+    <table>
+        <tr><td class="label">점검일자</td><td id="pdf-date"></td><td class="label">시공업체</td><td id="pdf-contractor"></td></tr>
+        <tr><td class="label">현장명</td><td id="pdf-site" colspan="3"></td></tr>
+        <tr><td class="label">동/호수</td><td id="pdf-unit"></td><td class="label">위치</td><td id="pdf-loc"></td></tr>
+        <tr><td class="label">공종</td><td id="pdf-work"></td><td class="label">하자유형</td><td id="pdf-type"></td></tr>
+        <tr><td class="label">상세내용</td><td id="pdf-desc" colspan="3" style="text-align:left; height:60px; vertical-align:top;"></td></tr>
+    </table>
+    <div class="pdf-photo-grid">
+        <div class="pdf-photo-item"><p>[ 작 업 전 ]</p><img id="pdf-img1"></div>
+        <div class="pdf-photo-item"><p>[ 작 업 후 ]</p><img id="pdf-img2"></div>
+    </div>
 </div>
 
 <script>
-  // 🌟 [매우 중요] 여기에 방금 발급받은 '새 구글 웹 앱 URL'을 붙여넣으세요!
-  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyFvxP7hkH9Tgp11rhCh4PNH88C0_c0tZCO0fVhwBH9UnQYq_2PhK_r8NlCdGletPnDWw/exec";
+    // 🌟 URL 확인: 기존의 앱스스크립트 주소 그대로 사용하시면 됩니다.
+    const MY_GAS_URL = "https://script.google.com/macros/s/AKfycbyFvxP7hkH9Tgp11rhCh4PNH88C0_c0tZCO0fVhwBH9UnQYq_2PhK_r8NlCdGletPnDWw/exec";
 
-  // 오늘 날짜 기본 세팅
-  document.getElementById('date').valueAsDate = new Date();
+    let cloudDB = {}; 
+    let savedList = []; 
+    let editIndex = -1; 
+    let pendingData = null;
 
-  // 파일 선택 시 테두리 초록색으로 변경
-  function checkFile(input, boxId) {
-    const box = document.getElementById(boxId);
-    if (input.files && input.files[0]) {
-      box.classList.add('active');
-      box.innerHTML = "✅ 선택됨<br><span style='font-size:0.7rem; color:#2ecc71;'>" + input.files[0].name.substring(0, 8) + "...</span>";
-      // input 태그가 덮어씌워지지 않도록 다시 추가
-      const hiddenInput = document.createElement('input');
-      hiddenInput.type = 'file';
-      hiddenInput.id = input.id;
-      hiddenInput.accept = 'image/*';
-      hiddenInput.style.display = 'none';
-      hiddenInput.onchange = function() { checkFile(this, boxId); };
-      box.appendChild(hiddenInput);
-    }
-  }
+    window.onload = function() {
+        try {
+            document.getElementById('today-date').value = new Date().toISOString().substring(0, 10);
+            fetchCloudDB();
+        } catch(e) {}
+    };
 
-  // Base64 인코딩 함수
-  function getBase64(file) {
-    return new Promise((resolve, reject) => {
-      if (!file) { resolve(""); return; }
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result.split(',')[1]); 
-      reader.onerror = error => reject(error);
-    });
-  }
-
-  async function submitData() {
-    if (WEB_APP_URL === "여기에_새로운_구글스크립트_주소_입력") {
-      alert("⚠️ 먼저 HTML 파일 안에 구글 스크립트 주소(WEB_APP_URL)를 입력해 주세요!");
-      return;
+    function toggleConfig() {
+        const config = document.getElementById('config-section');
+        config.style.display = (config.style.display === 'none' || config.style.display === '') ? 'block' : 'none';
     }
 
-    const btn = document.getElementById("submitBtn");
-    const statusMsg = document.getElementById("statusMessage");
+    async function fetchCloudDB() {
+        const select = document.getElementById('db-sheet');
+        const btnSend = document.querySelector('.btn-send');
+        select.innerHTML = '<option value="">⏳ DB 다운로드 중...</option>';
+        try {
+            const response = await fetch(MY_GAS_URL);
+            const json = await response.json();
+            if(json.result === 'success') {
+                cloudDB = json.data;
+                const sheetNames = Object.keys(cloudDB);
+                if(sheetNames.length === 0) { select.innerHTML = '<option value="">⚠️ 데이터가 없습니다.</option>'; return; }
+                select.innerHTML = '<option value="">📑 공종을 선택하세요</option>';
+                sheetNames.forEach(name => { select.innerHTML += `<option value="${name}">${name} (데이터 ${cloudDB[name].length}건)</option>`; });
+                btnSend.innerText = "최종 전송 (시트+드라이브)"; btnSend.disabled = false; btnSend.style.background = "var(--share)";
+            } else { select.innerHTML = '<option value="">❌ DB 연동 실패</option>'; }
+        } catch (error) { 
+            select.innerHTML = '<option value="">⛔ 서버 점검 중입니다 (작업 불가)</option>';
+            btnSend.innerText = "⛔ 서버 점검 중 (전송 불가)"; btnSend.disabled = true; btnSend.style.background = "#7f8c8d";
+            alert("⚠️ 안내: 현재 시스템 점검 중입니다.\n\n관리자가 서버를 점검하고 있습니다.\n완료 후 다시 접속해 주세요."); 
+        }
+    }
+
+    function searchAndFill(searchNo) {
+        const selectedSheetName = document.getElementById('db-sheet').value;
+        const fields = ['site', 'dong', 'ho', 'loc', 'work', 'type', 'contractor', 'desc'];
+        if (!selectedSheetName) { alert("먼저 위의 '공종'을 선택해 주세요!"); document.getElementById('no').value = ''; return; }
+        const currentDB = cloudDB[selectedSheetName] || [];
+        const found = currentDB.find(item => String(item.no) === String(searchNo));
+        fields.forEach(id => {
+            document.getElementById(id).value = found ? (found[id] || '') : '';
+            found && found[id] ? document.getElementById(id).classList.add('filled') : document.getElementById(id).classList.remove('filled');
+        });
+    }
+
+    function clearFormButKeepSheet() {
+        const fields = ['no','site','dong','ho','loc','work','type','contractor','desc'];
+        fields.forEach(id => { document.getElementById(id).value = ''; document.getElementById(id).classList.remove('filled'); });
+    }
+
+    function addWatermark(imgObj, data, pId) {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        const MAX_SIZE = 1200; let w = imgObj.width; let h = imgObj.height;
+        if (w > h) { if (w > MAX_SIZE) { h *= MAX_SIZE / w; w = MAX_SIZE; } } else { if (h > MAX_SIZE) { w *= MAX_SIZE / h; h = MAX_SIZE; } }
+        canvas.width = w; canvas.height = h;
+        ctx.drawImage(imgObj, 0, 0, w, h);
+
+        const boxWidth = w * 0.45;
+        const boxHeight = h * 0.22;
+        const x = 0;
+        const y = h - boxHeight;
+        
+        ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+        ctx.fillRect(x, y, boxWidth, boxHeight);
+        ctx.strokeStyle = "#ccc"; ctx.lineWidth = 2; ctx.strokeRect(x, y, boxWidth, boxHeight);
+
+        const fontSize = Math.max(14, Math.floor(h * 0.025));
+        ctx.font = `bold ${fontSize}px 'Pretendard', sans-serif`;
+        ctx.fillStyle = "black";
+        ctx.textAlign = "left"; ctx.textBaseline = "middle";
+        
+        const lineHeight = boxHeight / 5; const paddingX = fontSize;
+        const colDivider = boxWidth * 0.22;
+        
+        let descSuffix = "";
+        if (pId === 'p1') descSuffix = " - [전]";
+        else if (pId === 'p2') descSuffix = " - [후]";
+
+        const labels = ["현 장", "위 치", "내 용", "공 정", "일 자"];
+        const values = [
+            data.site || "",
+            (data.dong && data.ho) ? `${data.dong}동 ${data.ho}호` : "",
+            (data.desc || "") + descSuffix, 
+            data.work || "",
+            data.date || ""
+        ];
+
+        for(let i=0; i<5; i++) {
+            let currentY = y + (lineHeight * i) + (lineHeight / 2);
+            ctx.fillText(labels[i], x + paddingX, currentY);
+            ctx.beginPath(); ctx.moveTo(x + colDivider, y + (lineHeight * i)); ctx.lineTo(x + colDivider, y + (lineHeight * (i+1))); ctx.stroke();
+            if(i < 4) { ctx.beginPath(); ctx.moveTo(x, y + (lineHeight * (i+1))); ctx.lineTo(x + boxWidth, y + (lineHeight * (i+1))); ctx.stroke(); }
+            ctx.fillText(values[i], x + colDivider + paddingX, currentY);
+        }
+        
+        return canvas.toDataURL('image/jpeg', 0.9);
+    }
+
+    function view(input, pId, tId) {
+        if(input.files && input.files[0]){
+            const file = input.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imgObj = new Image();
+                imgObj.onload = function() {
+                    let finalSrc = "";
+                    if (pId === 'p1' || pId === 'p2') {
+                        const currentData = getCurrentData();
+                        finalSrc = addWatermark(imgObj, currentData, pId);
+                    } else {
+                        const canvas = document.createElement('canvas');
+                        let w = imgObj.width; let h = imgObj.height; const MAX_SIZE = 800;
+                        if (w > h) { if (w > MAX_SIZE) { h *= MAX_SIZE / w; w = MAX_SIZE; } } else { if (h > MAX_SIZE) { w *= MAX_SIZE / h; h = MAX_SIZE; } }
+                        canvas.width = w; canvas.height = h;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(imgObj, 0, 0, w, h);
+                        finalSrc = canvas.toDataURL('image/jpeg', 0.8);
+                    }
+                    
+                    const img = document.getElementById(pId);
+                    img.src = finalSrc;
+                    img.style.display = 'block';
+                    document.getElementById(tId).style.display = 'none';
+                };
+                imgObj.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function getCurrentData() {
+        return {
+            date: document.getElementById('today-date').value || '-',
+            no: document.getElementById('no').value,
+            site: document.getElementById('site').value,
+            dong: document.getElementById('dong').value,
+            ho: document.getElementById('ho').value,
+            loc: document.getElementById('loc').value,
+            work: document.getElementById('work').value,
+            type: document.getElementById('type').value,
+            contractor: document.getElementById('contractor').value,
+            desc: document.getElementById('desc').value,
+            p1: document.getElementById('p1').src || '',
+            p2: document.getElementById('p2').src || '',
+            p3: document.getElementById('p3').src || ''
+        };
+    }
+
+    function saveLocal() {
+        const data = getCurrentData();
+        if(!data.dong || !data.ho) return alert("동/호수는 필수 입력 사항입니다.");
+        if (editIndex > -1) { savedList[editIndex] = data; editIndex = -1; alert("수정되었습니다."); } 
+        else { savedList.push(data); alert("추가되었습니다."); }
+        updateTable();
+        clearForm();
+    }
+
+    function updateTable() {
+        const body = document.getElementById('list-body');
+        if (savedList.length === 0) {
+            body.innerHTML = '<tr><td colspan="4" style="color:#999; padding:20px;">저장된 작업이 없습니다.</td></tr>';
+        } else {
+            body.innerHTML = savedList.map((r, i) => `
+                <tr onclick="editRow(${i})" style="cursor:pointer;">
+                    <td>${r.no || '-'}</td>
+                    <td><b>${r.site}</b><br>${r.dong}-${r.ho}</td>
+                    <td>${r.work}<br><span style="color:#888; font-size:11px;">${r.type}</span></td>
+                    <td><button style="background:#95a5a6; padding:5px 10px; font-size:11px; border:none; border-radius:3px; color:white;" onclick="deleteRow(event, ${i})">삭제</button></td>
+                </tr>`).join('');
+        }
+        document.getElementById('count').innerText = savedList.length;
+    }
+
+    function editRow(index) {
+        const data = savedList[index];
+        editIndex = index;
+        const fields = ['site', 'dong', 'ho', 'loc', 'work', 'type', 'contractor', 'desc'];
+        document.getElementById('no').value = data.no;
+        fields.forEach(id => { document.getElementById(id).value = data[id]; document.getElementById(id).classList.add('filled'); });
+        
+        [1, 2, 3].forEach(i => {
+            const imgSrc = data['p' + i];
+            const imgEl = document.getElementById('p' + i);
+            const txtEl = document.getElementById('t' + i);
+            if (imgSrc && imgSrc.startsWith('data:image')) {
+                imgEl.src = imgSrc;
+                imgEl.style.display = 'block';
+                txtEl.style.display = 'none';
+            } else {
+                imgEl.src = '';
+                imgEl.style.display = 'none';
+                txtEl.style.display = 'block';
+            }
+        });
+        
+        window.scrollTo({top: 0, behavior: 'smooth'});
+    }
     
-    btn.disabled = true;
-    btn.innerText = "⏳ 전송 중... (약 5~10초)";
-    statusMsg.innerText = "";
-
-    try {
-      // 대표 사진(완료확인서)만 우선 구글로 전송 (구글 스크립트가 1개만 받도록 설정되어 있음)
-      // ※ 만약 3개 모두 전송하려면 구글 앱스 스크립트 코드 수정이 필요합니다!
-      const certFile = document.getElementById("img-cert").files[0];
-      const certBase64 = await getBase64(certFile);
-
-      const requestData = {
-        record: {
-          date: document.getElementById("date").value,
-          no: document.getElementById("no").value,
-          site: document.getElementById("site").value,
-          dong: document.getElementById("dong").value,
-          ho: document.getElementById("ho").value,
-          loc: document.getElementById("loc").value,
-          work: document.getElementById("work").value,
-          type: document.getElementById("type").value,
-          contractor: document.getElementById("contractor").value,
-          desc: document.getElementById("desc").value
-        },
-        certBase64: certBase64,
-        certName: certFile ? certFile.name : '완료확인서.jpg'
-      };
-
-      const response = await fetch(WEB_APP_URL, {
-        method: "POST",
-        body: JSON.stringify(requestData)
-      });
-
-      const result = await response.json();
-
-      if (result.result === "success") {
-        statusMsg.style.color = "#27ae60";
-        statusMsg.innerText = "✅ 성공적으로 전송되었습니다!";
-        setTimeout(() => location.reload(), 2000); // 2초 뒤 새로고침
-      } else {
-        throw new Error(result.message);
-      }
-
-    } catch (error) {
-      statusMsg.style.color = "#e74c3c";
-      statusMsg.innerText = "❌ 전송 실패: " + error.message;
-    } finally {
-      btn.disabled = false;
-      btn.innerText = "최종 전송 (시트+드라이브)";
+    function deleteRow(e, i) { e.stopPropagation(); if(confirm("삭제할까요?")) { savedList.splice(i, 1); updateTable(); } }
+    
+    function clearForm() {
+        const fields = ['no','site','dong','ho','loc','work','type','contractor','desc'];
+        fields.forEach(id => { document.getElementById(id).value = ''; document.getElementById(id).classList.remove('filled'); });
+        [1,2,3].forEach(i => { document.getElementById('p'+i).style.display = 'none'; document.getElementById('t'+i).style.display = 'block'; document.getElementById('f'+i).value = ''; document.getElementById('p'+i).src = ''; });
+        document.getElementById('db-sheet').value = ''; 
+        editIndex = -1;
     }
-  }
-</script>
 
+    async function sendToGoogleServer() {
+        pendingData = getCurrentData();
+        if(!pendingData.dong || !pendingData.ho) return alert("동/호수를 먼저 입력해주세요.");
+
+        const btn = document.querySelector('.btn-send');
+        btn.innerText = "⏳ 1/2: 첨부파일 준비 중...";
+        btn.disabled = true;
+        btn.style.background = "#7f8c8d";
+
+        try {
+            document.getElementById('pdf-date').innerText = pendingData.date;
+            document.getElementById('pdf-contractor').innerText = pendingData.contractor || "-";
+            document.getElementById('pdf-site').innerText = pendingData.site || "-";
+            document.getElementById('pdf-unit').innerText = `${pendingData.dong}동 ${pendingData.ho}호`;
+            document.getElementById('pdf-loc').innerText = pendingData.loc || "-";
+            document.getElementById('pdf-work').innerText = pendingData.work || "-";
+            document.getElementById('pdf-type').innerText = pendingData.type || "-";
+            document.getElementById('pdf-desc').innerText = pendingData.desc || "-";
+            
+            const emptyPx = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
+            document.getElementById('pdf-img1').src = document.getElementById('p1').src || emptyPx;
+            document.getElementById('pdf-img2').src = document.getElementById('p2').src || emptyPx;
+
+            const element = document.getElementById('pdf-template');
+            element.style.display = 'block'; 
+
+            const opt = { 
+                margin: 0, 
+                filename: `보고서.pdf`, 
+                image: { type: 'jpeg', quality: 0.95 }, 
+                html2canvas: { scale: 2, useCORS: true, windowWidth: 794, scrollY: 0 }, 
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
+            };
+            
+            const pdfBase64String = await html2pdf().set(opt).from(element).output('datauristring');
+            element.style.display = 'none'; 
+            const base64Data = pdfBase64String.split(',')[1];
+
+            let certBase64Data = "";
+            let certFileName = "";
+            const f3 = document.getElementById('f3');
+            if (f3.files && f3.files.length > 0) {
+                const ext = f3.files[0].name.split('.').pop() || 'jpg';
+                certFileName = `완료확인서_${pendingData.dong}동_${pendingData.ho}호.${ext}`;
+                const p3Src = document.getElementById('p3').src;
+                if(p3Src && p3Src.includes('base64,')) {
+                    certBase64Data = p3Src.split(',')[1];
+                }
+            } else if (pendingData.p3 && pendingData.p3.includes('base64,')) {
+                certFileName = `완료확인서_${pendingData.dong}동_${pendingData.ho}호.jpg`;
+                certBase64Data = pendingData.p3.split(',')[1];
+            }
+
+            btn.innerText = "⏳ 2/2: 드라이브 저장 중...";
+            btn.style.background = "#e67e22";
+
+            // 이메일 정보는 더 이상 보내지 않습니다.
+            const payload = { record: pendingData, pdfBase64: base64Data, certBase64: certBase64Data, certName: certFileName };
+            const response = await fetch(MY_GAS_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
+            const result = await response.json();
+
+            if(result.result === 'success') {
+                alert(`✅ 기록 완료, 드라이브 저장 완료!`);
+                const exists = savedList.find(item => item.dong === pendingData.dong && item.ho === pendingData.ho);
+                if(!exists) savedList.push(pendingData);
+                updateTable();
+                clearForm();    
+            } else { 
+                alert("⚠️ 서버 오류가 발생했습니다. 담당자에게 문의해 주세요."); 
+            }
+        } catch(e) { 
+            alert("❌ 전송 실패!\n인터넷 연결을 확인하거나 담당자에게 문의해 주세요."); 
+        }
+
+        btn.innerText = "최종 전송 (시트+드라이브)";
+        btn.style.background = "var(--share)";
+        btn.disabled = false;
+    }
+</script>
 </body>
 </html>
