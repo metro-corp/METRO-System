@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>(주)METRO R&S 스마트 현장관리 시스템 V28.7</title>
+    <title>(주)METRO R&S 스마트 현장관리 시스템 V28.8</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root { --primary: #1e272e; --accent: #3498db; --success: #27ae60; --pdf: #e74c3c; --highlight: #e8f6f3; --share: #9b59b6; }
@@ -38,7 +38,7 @@
 <header>
     <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
         <img src="logo.png" alt="METRO" style="height: 24px;" onerror="this.src='https://via.placeholder.com/100x30?text=METRO+R%26S'">
-        <span>(주)METRO 현장관리 시스템 V28.7</span>
+        <span>(주)METRO 현장관리 시스템 V28.8</span>
     </div>
 </header>
 
@@ -153,20 +153,38 @@
         document.getElementById('search-results').style.display='none';
     }
 
+    // 💡 핵심 수정: 완료확인서(p3)는 4:3으로 자르지 않고 세로 원본 비율을 완벽히 유지합니다!
     function proc(input, pId, tId) {
         if(input.files && input.files[0]) {
             const r = new FileReader(); r.onload = (e) => {
                 const img = new Image(); img.onload = () => {
                     const c = document.createElement('canvas'); const ctx = c.getContext('2d');
                     let w = img.width, h = img.height;
-                    let targetRatio = 4 / 3;
-                    let sX = 0, sY = 0, sW = w, sH = h;
-                    if (w / h > targetRatio) { sW = h * targetRatio; sX = (w - sW) / 2; } 
-                    else { sH = w / targetRatio; sY = (h - sH) / 2; }
-                    c.width = 1200; c.height = 900; 
-                    ctx.drawImage(img, sX, sY, sW, sH, 0, 0, 1200, 900);
-                    const final = (pId==='p3') ? c.toDataURL('image/jpeg',0.8) : addWM(c);
-                    document.getElementById(pId).src = final; document.getElementById(pId).style.display='block'; document.getElementById(tId).style.display='none';
+                    
+                    if (pId === 'p3') {
+                        // 완료확인서(p3)는 원본 비율을 그대로 유지하며 크기만 최적화
+                        let max = 1600; 
+                        if(w > h) { if(w > max) { h *= max/w; w = max; } } 
+                        else { if(h > max) { w *= max/h; h = max; } }
+                        c.width = w; c.height = h;
+                        ctx.drawImage(img, 0, 0, w, h);
+                        
+                        document.getElementById(pId).src = c.toDataURL('image/jpeg', 0.8);
+                    } else {
+                        // 작업 전/후(p1, p2)는 4:3으로 여백 없이 꽉 차게 잘라냄
+                        let targetRatio = 4 / 3;
+                        let sX = 0, sY = 0, sW = w, sH = h;
+                        if (w / h > targetRatio) { sW = h * targetRatio; sX = (w - sW) / 2; } 
+                        else { sH = w / targetRatio; sY = (h - sH) / 2; }
+                        
+                        c.width = 1200; c.height = 900; 
+                        ctx.drawImage(img, sX, sY, sW, sH, 0, 0, 1200, 900);
+                        
+                        document.getElementById(pId).src = addWM(c);
+                    }
+                    
+                    document.getElementById(pId).style.display='block'; 
+                    document.getElementById(tId).style.display='none';
                 };
                 img.src = e.target.result;
             };
@@ -174,12 +192,10 @@
         }
     }
 
-    // 💡 핵심: 워터마크 배경을 반투명(rgba 0.7)하게 변경했습니다.
     function addWM(c) {
         const ctx = c.getContext('2d'), w = c.width, h = c.height;
         const bw = w * 0.45; const bh = h * 0.25; const x = 0, y = h - bh; 
         
-        // 🔥 기존 "white" -> "rgba(255, 255, 255, 0.7)" 로 변경 (70% 불투명도)
         ctx.fillStyle = "rgba(255, 255, 255, 0.7)"; 
         ctx.fillRect(x, y, bw, bh);
 
