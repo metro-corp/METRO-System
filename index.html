@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>(주)METRO R&S 스마트 현장관리 시스템 V30.1</title>
+    <title>(주)METRO R&S 스마트 현장관리 시스템 V30.2</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
@@ -82,7 +82,7 @@
 <header>
     <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
         <img src="logo.png" alt="METRO" style="height: 24px; border-radius: 4px;" onerror="this.src='https://via.placeholder.com/100x30?text=METRO+R%26S'">
-        <span>(주)METRO 현장관리 시스템 V30.1</span>
+        <span>(주)METRO 현장관리 시스템 V30.2</span>
     </div>
 </header>
 
@@ -172,7 +172,8 @@
             const r = await fetch(`${MY_GAS_URL}?mode=getSites&t=${new Date().getTime()}`);
             const j = await r.json();
             if(j.result==='success') {
-                s.innerHTML = `<option value="">🏢 현장을 선택해주세요 (${j.sites.length}개 로드됨)</option>`;
+                // 💡 (3개 로드됨) 텍스트 삭제 완료!
+                s.innerHTML = `<option value="">🏢 현장을 선택해주세요</option>`;
                 j.sites.forEach(v => s.innerHTML += `<option value="${v.id}">${v.name}</option>`);
             } else { throw new Error(j.message); }
         } catch(e) { s.innerHTML = '<option value="">❌ 로드 실패 (로그인/권한 확인)</option>'; }
