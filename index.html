@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>(주)METRO R&S 스마트 현장관리 시스템 V1.5</title>
+    <title>(주)METRO R&S 현장관리 시스템 V1.7</title>
     
-    <meta property="og:title" content="(주)METRO R&S 스마트 현장관리 시스템">
+    <meta property="og:title" content="(주)METRO R&S 현장관리 시스템">
     <meta property="og:description" content="현장 사진 촬영부터 PDF 보고서 자동 생성, 구글 드라이브 분류까지 한 번에 처리하는 통합 솔루션">
     <meta property="og:image" content="https://metro-corp.github.io/og-image.png">
     <meta property="og:type" content="website">
@@ -88,7 +88,7 @@
         .action-btn.del { background: #fee2e2; color: var(--danger); }
         .action-btn:hover { filter: brightness(0.95); transform: translateY(-1px); }
 
-        #pdf-template { display: none; width: 794px; height: 1122px; padding: 40px; background: white; font-family: 'Malgun Gothic', sans-serif; box-sizing: border-box; overflow: hidden; }
+        #pdf-template { display: none; width: 794px; height: 1122px; padding: 30px 40px; background: white; font-family: 'Malgun Gothic', sans-serif; box-sizing: border-box; overflow: hidden; }
     </style>
 </head>
 <body>
@@ -96,7 +96,7 @@
 <header>
     <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
         <img src="logo.png" alt="METRO" style="height: 24px; border-radius: 4px;" onerror="this.src='https://via.placeholder.com/100x30?text=METRO+R%26S'">
-        <span>(주)METRO 현장관리 시스템 V1.5</span>
+        <span>(주)METRO R&S 현장관리 시스템 V1.7</span>
     </div>
 </header>
 
@@ -162,13 +162,13 @@
         <tr><td style="border:1px solid #000; padding:8px; background:#eee; font-weight:bold;">동/호</td><td id="pdf-unit" style="border:1px solid #000; padding:8px;"></td><td style="border:1px solid #000; padding:8px; background:#eee; font-weight:bold;">위치</td><td id="pdf-loc" style="border:1px solid #000; padding:8px;"></td></tr>
         <tr><td style="border:1px solid #000; padding:8px; background:#eee; font-weight:bold;">설명</td><td id="pdf-desc" colspan="3" style="border:1px solid #000; padding:8px; height:50px;"></td></tr>
     </table>
-    <div style="text-align:center; margin-top:20px;">
-        <p style="font-weight:bold; margin-bottom:5px; font-size:16px;">[ 작 업 전 ]</p>
-        <img id="pdf-p1" style="width:480px; height:360px; object-fit:contain; border:1px solid #000; display:block; margin:0 auto;">
-    </div>
     <div style="text-align:center; margin-top:15px;">
+        <p style="font-weight:bold; margin-bottom:5px; font-size:16px;">[ 작 업 전 ]</p>
+        <img id="pdf-p1" style="width:460px; height:340px; object-fit:contain; border:1px solid #000; display:block; margin:0 auto;">
+    </div>
+    <div style="text-align:center; margin-top:10px;">
         <p style="font-weight:bold; margin-bottom:5px; font-size:16px;">[ 작 업 후 ]</p>
-        <img id="pdf-p2" style="width:480px; height:360px; object-fit:contain; border:1px solid #000; display:block; margin:0 auto;">
+        <img id="pdf-p2" style="width:460px; height:340px; object-fit:contain; border:1px solid #000; display:block; margin:0 auto;">
     </div>
 </div>
 
@@ -363,10 +363,7 @@
             document.body.appendChild(a);
             a.click();
             
-            setTimeout(() => {
-                document.body.removeChild(a);
-                URL.revokeObjectURL(blobUrl);
-            }, 2000);
+            setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(blobUrl); }, 2000);
         } catch(e) { console.error("다운로드 에러:", e); }
     }
 
@@ -376,10 +373,8 @@
         
         const baseName = `${d.dong}동_${d.ho}호`;
         
-        // 💡 핵심 변경: 딜레이 없이 동시에 2개의 다운로드를 요청하여, 브라우저가 정당한 '사용자 클릭'으로 인식하도록 묶어버립니다.
-        // 이때 삼성 인터넷/크롬에서 "여러 파일 다운로드를 허용하시겠습니까?" 팝업이 뜰 수 있습니다. 허용을 누르면 2장 모두 저장됩니다.
-        if (d.p1 && d.p1.length > 100) downloadImg(d.p1, `${baseName}_작업전.jpg`);
-        if (d.p2 && d.p2.length > 100) downloadImg(d.p2, `${baseName}_작업후.jpg`);
+        // 💡 1차 다운로드: 버튼 누르는 즉시 '작업 전' 사진 저장 (사용자 클릭 이벤트 인정)
+        if (d.p1 && d.p1.length > 100) { downloadImg(d.p1, `${baseName}_작업전.jpg`); }
 
         btn.innerHTML = "⏳ 전송 중입니다..."; btn.style.pointerEvents = "none"; btn.style.opacity = "0.8";
         
@@ -396,7 +391,8 @@
             
             const pdf = await html2pdf().set({ 
                 margin: 0, filename: `보고서_${d.dong}동_${d.ho}호.pdf`, image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, scrollY: 0 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
+                html2canvas: { scale: 2, useCORS: true, scrollY: 0, windowWidth: 794 }, 
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
             }).from(el).output('datauristring');
             
             el.style.display = 'none';
@@ -407,11 +403,13 @@
             const j = await r.json();
             
             if(j.result==='success') { 
-                alert("🎉 성공적으로 전송되었습니다!"); 
-                if (editingIndex > -1) {
-                    savedList.splice(editingIndex, 1);
-                    updateTable();
-                }
+                // 💡 핵심 해결책: 성공 알림창을 띄우고, 대표님이 [확인]을 누르는 것을 '새로운 클릭'으로 받아들여 차단을 뚫습니다!
+                alert("🎉 구글 드라이브 전송 완료!\n\n[확인]을 누르시면 갤러리에 '작업 후' 사진이 마저 저장됩니다.");
+                
+                // 💡 2차 다운로드: 확인 버튼 누른 직후 '작업 후' 사진 안전하게 저장
+                if (d.p2 && d.p2.length > 100) { downloadImg(d.p2, `${baseName}_작업후.jpg`); }
+
+                if (editingIndex > -1) { savedList.splice(editingIndex, 1); updateTable(); }
                 clearInputs(); 
                 btn.innerHTML = "🚀 최종 전송"; 
                 btn.style.pointerEvents = "auto"; 
