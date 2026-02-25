@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>(주)METRO R&S 스마트 현장관리 시스템 V1.0</title>
+    <title>(주)METRO R&S 스마트 현장관리 시스템 V1.1</title>
     
     <meta property="og:title" content="(주)METRO R&S 스마트 현장관리 시스템">
     <meta property="og:description" content="현장 사진 촬영부터 PDF 보고서 자동 생성, 구글 드라이브 분류까지 한 번에 처리하는 통합 솔루션">
@@ -88,8 +88,8 @@
         .action-btn.del { background: #fee2e2; color: var(--danger); }
         .action-btn:hover { filter: brightness(0.95); transform: translateY(-1px); }
 
-        /* 💡 수정됨: 높이 제한을 없애고 내용물에 맞게 자동 조절되도록 수정 (A4 핏 버그 해결) */
-        #pdf-template { display: none; width: 750px; padding: 10px; background: white; font-family: 'Malgun Gothic', sans-serif; box-sizing: border-box; }
+        /* 💡 수정됨: 가장 안정적이었던 완벽한 A4 비율(794x1122)로 롤백! */
+        #pdf-template { display: none; width: 794px; height: 1122px; padding: 40px; background: white; font-family: 'Malgun Gothic', sans-serif; box-sizing: border-box; overflow: hidden; }
     </style>
 </head>
 <body>
@@ -97,7 +97,7 @@
 <header>
     <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
         <img src="logo.png" alt="METRO" style="height: 24px; border-radius: 4px;" onerror="this.src='https://via.placeholder.com/100x30?text=METRO+R%26S'">
-        <span>(주)METRO 현장관리 시스템 V1.0</span>
+        <span>(주)METRO 현장관리 시스템 V1.1</span>
     </div>
 </header>
 
@@ -156,7 +156,7 @@
 </div>
 
 <div id="pdf-template">
-    <h2 style="text-align:center; margin-top:10px; margin-bottom:15px; font-size:24px;">하자보수 작업 완료 사진대지</h2>
+    <h2 style="text-align:center; margin-top:0; margin-bottom:15px; font-size:24px;">하자보수 작업 완료 사진대지</h2>
     <table style="width:100%; border-collapse:collapse; border:2px solid #000; font-size:14px; margin-top:0;">
         <tr><td style="border:1px solid #000; padding:8px; background:#eee; font-weight:bold; width:15%;">일자</td><td id="pdf-date" style="border:1px solid #000; padding:8px; width:35%;"></td><td style="border:1px solid #000; padding:8px; background:#eee; font-weight:bold; width:15%;">시공업체</td><td id="pdf-contractor" style="border:1px solid #000; padding:8px; width:35%;"></td></tr>
         <tr><td style="border:1px solid #000; padding:8px; background:#eee; font-weight:bold;">현장명</td><td id="pdf-site" colspan="3" style="border:1px solid #000; padding:8px;"></td></tr>
@@ -165,11 +165,11 @@
     </table>
     <div style="text-align:center; margin-top:20px;">
         <p style="font-weight:bold; margin-bottom:5px; font-size:16px;">[ 작 업 전 ]</p>
-        <img id="pdf-p1" style="width:450px; height:337px; object-fit:contain; border:1px solid #000; display:block; margin:0 auto;">
+        <img id="pdf-p1" style="width:480px; height:360px; object-fit:contain; border:1px solid #000; display:block; margin:0 auto;">
     </div>
     <div style="text-align:center; margin-top:15px;">
         <p style="font-weight:bold; margin-bottom:5px; font-size:16px;">[ 작 업 후 ]</p>
-        <img id="pdf-p2" style="width:450px; height:337px; object-fit:contain; border:1px solid #000; display:block; margin:0 auto;">
+        <img id="pdf-p2" style="width:480px; height:360px; object-fit:contain; border:1px solid #000; display:block; margin:0 auto;">
     </div>
 </div>
 
@@ -340,7 +340,6 @@
         updateTable(); 
     }
 
-    // 💡 핵심 1: 스마트폰 강제 이름 무시 현상을 해결하기 위해 사진을 순수 데이터(Blob)로 변환하는 함수 추가
     function b64toBlob(b64Data, contentType='') {
         const byteCharacters = atob(b64Data);
         const byteArrays = [];
@@ -353,21 +352,28 @@
         return new Blob(byteArrays, {type: contentType});
     }
 
-    // 💡 파일 다운로드 함수 개선 (Blob 사용)
+    // 💡 수정됨: 스마트폰 다운로드 시 딜레이를 주어 안드로이드가 이름을 완벽히 인식하게 함
     function downloadImg(dataUrl, filename, delay) {
         if (!dataUrl || dataUrl.length < 100) return;
         setTimeout(() => {
-            const b64Data = dataUrl.split(',')[1];
-            const blob = b64toBlob(b64Data, 'image/jpeg');
-            const blobUrl = URL.createObjectURL(blob);
-            
-            const a = document.createElement('a');
-            a.href = blobUrl;
-            a.download = filename; // 이제 스마트폰이 이 이름을 절대 무시하지 못합니다.
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(blobUrl);
+            try {
+                const b64Data = dataUrl.split(',')[1];
+                const blob = b64toBlob(b64Data, 'image/jpeg');
+                const blobUrl = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = blobUrl;
+                a.download = filename; 
+                document.body.appendChild(a);
+                a.click();
+                
+                // 💡 다운로드 관리자가 파일을 가로챌 시간을 3초간 충분히 부여합니다.
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(blobUrl);
+                }, 3000);
+            } catch(e) { console.error("다운로드 에러:", e); }
         }, delay);
     }
 
@@ -388,10 +394,10 @@
             
             const el = document.getElementById('pdf-template'); el.style.display = 'block';
             
-            // 💡 핵심 2: PDF 여백을 자체 기능(margin: 10)으로 주고 화면 너비를 고정하여 A4 안에 완벽히 들어가게 설정
+            // 💡 수정됨: 여백을 0으로 되돌려 가장 완벽했던 V31.4 버전 비율로 롤백!
             const pdf = await html2pdf().set({ 
-                margin: 10, filename: `보고서_${d.dong}동_${d.ho}호.pdf`, image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, windowWidth: 800 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
+                margin: 0, filename: `보고서_${d.dong}동_${d.ho}호.pdf`, image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
             }).from(el).output('datauristring');
             
             el.style.display = 'none';
