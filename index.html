@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>(주)METRO R&S 스마트 현장관리 시스템 V30.8</title>
+    <title>(주)METRO R&S 스마트 현장관리 시스템 V30.9</title>
     
     <meta property="og:title" content="(주)METRO R&S 스마트 현장관리 시스템">
     <meta property="og:description" content="현장 사진 촬영부터 PDF 보고서 자동 생성, 구글 드라이브 분류까지 한 번에 처리하는 통합 솔루션">
@@ -94,7 +94,7 @@
 <header>
     <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
         <img src="logo.png" alt="METRO" style="height: 24px; border-radius: 4px;" onerror="this.src='https://via.placeholder.com/100x30?text=METRO+R%26S'">
-        <span>(주)METRO 현장관리 시스템 V30.8</span>
+        <span>(주)METRO 현장관리 시스템 V30.9</span>
     </div>
 </header>
 
@@ -332,15 +332,34 @@
         updateTable(); 
     }
 
+    // 💡 이미지 다운로드 도우미 함수 추가
+    function downloadImg(dataUrl, filename, delay) {
+        if (!dataUrl || dataUrl.length < 100) return;
+        setTimeout(() => {
+            const a = document.createElement('a');
+            a.href = dataUrl;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }, delay);
+    }
+
     async function send() {
         const btn = document.getElementById('btn-send'); const d = getD();
         if(!currentSid || !d.dong || !d.ho) return alert("현장 및 정보를 확인하세요.");
         btn.innerHTML = "⏳ 전송 중입니다..."; btn.style.pointerEvents = "none"; btn.style.opacity = "0.8";
+        
         try {
+            // 💡 전송 버튼 누르자마자 워터마크가 박힌 사진 2장을 스마트폰으로 자동 다운로드! (0.5초 간격)
+            const baseName = `${d.site}_${d.dong}동_${d.ho}호`;
+            downloadImg(d.p1, `${baseName}_작업전.jpg`, 0);
+            downloadImg(d.p2, `${baseName}_작업후.jpg`, 500);
+
             document.getElementById('pdf-date').innerText = d.date; document.getElementById('pdf-contractor').innerText = d.contractor;
             document.getElementById('pdf-site').innerText = d.site; document.getElementById('pdf-unit').innerText = `${d.dong}동 ${d.ho}호`;
             document.getElementById('pdf-loc').innerText = d.loc; document.getElementById('pdf-desc').innerText = d.desc;
-            document.getElementById('pdf-p1').src = document.getElementById('p1').src || ""; document.getElementById('pdf-p2').src = document.getElementById('p2').src || "";
+            document.getElementById('pdf-p1').src = d.p1 || ""; document.getElementById('pdf-p2').src = d.p2 || "";
             
             const el = document.getElementById('pdf-template'); el.style.display = 'block';
             
@@ -350,7 +369,7 @@
             }).from(el).output('datauristring');
             
             el.style.display = 'none';
-            const payload = { targetSheetId: currentSid, record: d, pdfBase64: pdf.split(',')[1], p1Base64: document.getElementById('p1').src.split(',')[1]||"", p2Base64: document.getElementById('p2').src.split(',')[1]||"", p3Base64: document.getElementById('p3').src.split(',')[1]||"" };
+            const payload = { targetSheetId: currentSid, record: d, pdfBase64: pdf.split(',')[1], p1Base64: (d.p1||"").split(',')[1]||"", p2Base64: (d.p2||"").split(',')[1]||"", p3Base64: (d.p3||"").split(',')[1]||"" };
             const r = await fetch(MY_GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
             const j = await r.json();
             if(j.result==='success') { alert("🎉 성공적으로 전송되었습니다!"); location.reload(); }
