@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>(주)METRO R&S 통합 관리 V24</title>
+    <title>(주)METRO R&S 스마트 현장관리 시스템 V28.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root { --primary: #1e272e; --accent: #3498db; --success: #27ae60; --pdf: #e74c3c; --highlight: #e8f6f3; --share: #9b59b6; }
@@ -38,7 +38,7 @@
 <header>
     <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
         <img src="logo.png" alt="METRO" style="height: 24px;" onerror="this.src='https://via.placeholder.com/100x30?text=METRO+R%26S'">
-        <span>통합 관리 시스템 V24</span>
+        <span>(주)METRO 현장관리 시스템 V28.0</span>
     </div>
 </header>
 
@@ -127,7 +127,7 @@
         const d = document.getElementById('db-sheet'); d.innerHTML = '<option value="">⏳ 데이터 로딩 중...</option>';
         try {
             // 이제 currentSid는 암호같은 ID가 아니라 'https://...' 형태의 URL입니다!
-            const r = await fetch(`${MY_GAS_URL}?sid=${encodeURIComponent(currentSid)}&t=${new Date().getTime()}`);
+            const r = await fetch(`${MY_GAS_URL}?targetId=${encodeURIComponent(currentSid)}&t=${new Date().getTime()}`);
             const j = await r.json();
             if(j.result==='success') {
                 cloudDB = j.data; d.innerHTML = '<option value="">📑 공종 선택</option>';
