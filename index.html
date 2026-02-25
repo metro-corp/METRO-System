@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>(주)METRO R&S 스마트 현장관리 시스템 V31.3</title>
+    <title>(주)METRO R&S 스마트 현장관리 시스템 V31.4</title>
     
     <meta property="og:title" content="(주)METRO R&S 스마트 현장관리 시스템">
     <meta property="og:description" content="현장 사진 촬영부터 PDF 보고서 자동 생성, 구글 드라이브 분류까지 한 번에 처리하는 통합 솔루션">
@@ -96,7 +96,7 @@
 <header>
     <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
         <img src="logo.png" alt="METRO" style="height: 24px; border-radius: 4px;" onerror="this.src='https://via.placeholder.com/100x30?text=METRO+R%26S'">
-        <span>(주)METRO 현장관리 시스템 V31.3</span>
+        <span>(주)METRO 현장관리 시스템 V31.4</span>
     </div>
 </header>
 
@@ -260,7 +260,8 @@
         const ctx = c.getContext('2d'), w = c.width, h = c.height;
         const bw = w * 0.45; const bh = h * 0.25; const x = 0, y = h - bh; 
         
-        ctx.fillStyle = "rgba(255, 255, 255, 0.5)"; 
+        // 💡 수정됨: 배경을 완전 불투명한 흰색으로 변경
+        ctx.fillStyle = "white"; 
         ctx.fillRect(x, y, bw, bh);
 
         ctx.lineWidth = 1; ctx.strokeStyle = "black"; ctx.strokeRect(x, y, bw, bh); 
@@ -270,7 +271,8 @@
         ctx.font = `${Math.floor(rowH * 0.5)}px sans-serif`; ctx.fillStyle = "black"; ctx.textBaseline = "middle";
         
         const d = getD(); 
-        const vls = [d.site, `${d.dong}-${d.ho} (${d.loc})`, (d.desc||"").substring(0,35), d.work, d.date];
+        // 💡 수정됨: 위치 칸에 동, 호수만 나오도록 변경
+        const vls = [d.site, `${d.dong}동 ${d.ho}호`, (d.desc||"").substring(0,35), d.work, d.date];
         const lbls = ["현 장", "위 치", "내 용", "공 정", "일 자"];
         
         for(let i=0; i<rows; i++) {
@@ -357,6 +359,7 @@
         btn.innerHTML = "⏳ 전송 중입니다..."; btn.style.pointerEvents = "none"; btn.style.opacity = "0.8";
         
         try {
+            // 💡 수정됨: 파일명에서 현장명을 제거하고 동_호수만 남김
             const baseName = `${d.dong}동_${d.ho}호`;
             downloadImg(d.p1, `${baseName}_작업전.jpg`, 0);
             downloadImg(d.p2, `${baseName}_작업후.jpg`, 500);
@@ -380,16 +383,11 @@
             
             if(j.result==='success') { 
                 alert("🎉 성공적으로 전송되었습니다!"); 
-                
-                // 💡 핵심 변경: 전송 완료 시 임시저장 목록에서 방금 보낸 것 자동 삭제
                 if (editingIndex > -1) {
                     savedList.splice(editingIndex, 1);
                     updateTable();
                 }
-                
-                // 💡 핵심 변경: 화면 새로고침 없이 입력된 정보(동,호수,사진)만 지우고 현장과 공종은 유지
                 clearInputs(); 
-                
                 btn.innerHTML = "🚀 최종 전송"; 
                 btn.style.pointerEvents = "auto"; 
                 btn.style.opacity = "1"; 
