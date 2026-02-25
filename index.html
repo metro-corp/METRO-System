@@ -30,18 +30,7 @@
         table { width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed; margin-top: 10px; }
         th, td { border-bottom: 1px solid #eee; padding: 10px 4px; text-align: center; }
         th { background: #f8f9fa; }
-        
-        /* PDF 1장 맞춤 고정 사이즈 */
-        #pdf-template { 
-            display: none; 
-            width: 794px; 
-            height: 1122px; 
-            padding: 40px; 
-            background: white; 
-            font-family: 'Malgun Gothic', sans-serif; 
-            box-sizing: border-box; 
-            overflow: hidden; 
-        }
+        #pdf-template { display: none; width: 794px; height: 1122px; padding: 40px; background: white; font-family: 'Malgun Gothic', sans-serif; box-sizing: border-box; overflow: hidden; }
     </style>
 </head>
 <body>
@@ -115,9 +104,7 @@
 </div>
 
 <script>
-    // 🌟 대표님의 기존 통신 URL
     const MY_GAS_URL = "https://script.google.com/macros/s/AKfycbyfvRyEKhbbH9s6F7p9YT7BaUSwNkkJaLzydpte09vCCvCz7nfBUN6zyFUwMFBppVLA/exec"; 
-    
     let cloudDB = {}; let currentSid = ""; let savedList = [];
 
     window.onload = () => { getSites(); document.getElementById('today-date').value = new Date().toISOString().substring(0, 10); };
@@ -131,10 +118,7 @@
                 s.innerHTML = `<option value="">🏢 현장을 선택하세요 (불러온 현장: ${j.sites.length}개)</option>`;
                 j.sites.forEach(v => s.innerHTML += `<option value="${v.id}">${v.name}</option>`);
             } else { throw new Error(j.message); }
-        } catch(e) { 
-            s.innerHTML = '<option value="">❌ 로드 실패 (로그인/권한 확인)</option>'; 
-            alert("목록 불러오기 실패 원인:\n" + e.message); 
-        }
+        } catch(e) { s.innerHTML = '<option value="">❌ 로드 실패 (로그인/권한 확인)</option>'; }
     }
 
     async function loadDB() {
@@ -148,10 +132,7 @@
                 cloudDB = j.data; d.innerHTML = '<option value="">📑 공종 선택</option>';
                 Object.keys(cloudDB).forEach(n => d.innerHTML += `<option value="${n}">${n}</option>`);
             } else { throw new Error(j.message); }
-        } catch(e) { 
-            d.innerHTML = '<option value="">❌ 2단계 로드 실패</option>'; 
-            alert("🚨 2단계 공종 DB 로드 실패 원인:\n" + e.message); 
-        }
+        } catch(e) { d.innerHTML = '<option value="">❌ 2단계 로드 실패</option>'; }
     }
 
     function search() {
@@ -189,50 +170,31 @@
 
     function addWM(c) {
         const ctx = c.getContext('2d'), w = c.width, h = c.height;
-        const bw = w * 0.5;  
-        const bh = h * 0.25; 
-        const x = 10, y = h - bh - 10; 
-
-        ctx.fillStyle = "rgba(255, 255, 255, 0.85)"; 
-        ctx.fillRect(x, y, bw, bh);
-
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = "black";
-        ctx.strokeRect(x, y, bw, bh); 
-
-        const rows = 5;
-        const rowH = bh / rows;
-        const colW = bw * 0.25; 
-
-        ctx.font = `bold ${Math.floor(rowH * 0.6)}px sans-serif`;
-        ctx.fillStyle = "black";
-        ctx.textBaseline = "middle";
-
-        const d = getD();
-        const vls = [d.site, `${d.dong}-${d.ho} (${d.loc})`, (d.desc||"").substring(0,15), d.work, d.date];
+        const bw = w * 0.5; const bh = h * 0.25; const x = 10, y = h - bh - 10; 
+        ctx.fillStyle = "rgba(255, 255, 255, 0.85)"; ctx.fillRect(x, y, bw, bh);
+        ctx.lineWidth = 2; ctx.strokeStyle = "black"; ctx.strokeRect(x, y, bw, bh); 
+        const rows = 5; const rowH = bh / rows; const colW = bw * 0.25; 
+        ctx.font = `bold ${Math.floor(rowH * 0.6)}px sans-serif`; ctx.fillStyle = "black"; ctx.textBaseline = "middle";
+        const d = getD(); const vls = [d.site, `${d.dong}-${d.ho} (${d.loc})`, (d.desc||"").substring(0,15), d.work, d.date];
         const lbls = ["현 장", "위 치", "내 용", "공 정", "일 자"];
-
         for(let i=0; i<rows; i++) {
             const curY = y + (rowH * i);
-            if (i > 0) {
-                ctx.beginPath();
-                ctx.moveTo(x, curY);
-                ctx.lineTo(x + bw, curY);
-                ctx.stroke();
-            }
-            ctx.fillText(lbls[i], x + 10, curY + (rowH / 2));          
-            ctx.fillText(vls[i], x + colW + 10, curY + (rowH / 2));    
+            if (i > 0) { ctx.beginPath(); ctx.moveTo(x, curY); ctx.lineTo(x + bw, curY); ctx.stroke(); }
+            ctx.fillText(lbls[i], x + 10, curY + (rowH / 2)); ctx.fillText(vls[i], x + colW + 10, curY + (rowH / 2));    
         }
-
-        ctx.beginPath();
-        ctx.moveTo(x + colW, y);
-        ctx.lineTo(x + colW, y + bh);
-        ctx.stroke();
-
+        ctx.beginPath(); ctx.moveTo(x + colW, y); ctx.lineTo(x + colW, y + bh); ctx.stroke();
         return c.toDataURL('image/jpeg', 0.9);
     }
 
-    function getD() { return { date: document.getElementById('today-date').value, site: document.getElementById('site').value, dong: document.getElementById('dong').value, ho: document.getElementById('ho').value, loc: document.getElementById('loc').value, work: document.getElementById('work').value, type: document.getElementById('type').value, contractor: document.getElementById('contractor').value, desc: document.getElementById('desc').value }; }
+    // 💡 핵심 변경: 저장할 때 사진 1,2,3 데이터도 같이 저장합니다!
+    function getD() { 
+        return { 
+            date: document.getElementById('today-date').value, site: document.getElementById('site').value, dong: document.getElementById('dong').value, ho: document.getElementById('ho').value, loc: document.getElementById('loc').value, work: document.getElementById('work').value, type: document.getElementById('type').value, contractor: document.getElementById('contractor').value, desc: document.getElementById('desc').value,
+            p1: document.getElementById('p1').src, // 사진 1 저장
+            p2: document.getElementById('p2').src, // 사진 2 저장
+            p3: document.getElementById('p3').src  // 사진 3 저장
+        }; 
+    }
 
     function saveLocal() {
         const d = getD(); if(!d.dong || !d.ho) return alert("동, 호수 정보를 입력하세요.");
@@ -256,18 +218,30 @@
         document.getElementById('count').innerText = savedList.length;
     }
     
+    // 💡 핵심 변경: 불러올 때 사진이 있으면 복구해 줍니다!
     function loadLocal(i) {
         const d = savedList[i];
-        document.getElementById('today-date').value = d.date;
-        document.getElementById('dong').value = d.dong;
-        document.getElementById('ho').value = d.ho;
-        document.getElementById('loc').value = d.loc;
-        document.getElementById('work').value = d.work;
-        document.getElementById('type').value = d.type;
-        document.getElementById('contractor').value = d.contractor;
-        document.getElementById('desc').value = d.desc;
+        document.getElementById('today-date').value = d.date; document.getElementById('dong').value = d.dong; document.getElementById('ho').value = d.ho; document.getElementById('loc').value = d.loc; document.getElementById('work').value = d.work; document.getElementById('type').value = d.type; document.getElementById('contractor').value = d.contractor; document.getElementById('desc').value = d.desc;
+        
+        // 사진 복구 로직
+        [1, 2, 3].forEach(num => {
+            const imgEl = document.getElementById('p' + num);
+            const textEl = document.getElementById('t' + num);
+            const imgSrc = d['p' + num];
+            
+            if (imgSrc && imgSrc.length > 100) { // 저장된 사진이 있으면
+                imgEl.src = imgSrc;
+                imgEl.style.display = 'block';
+                textEl.style.display = 'none';
+            } else { // 사진이 없으면 
+                imgEl.src = '';
+                imgEl.style.display = 'none';
+                textEl.style.display = 'block';
+            }
+        });
+
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        alert(`✅ ${d.dong}동 ${d.ho}호 데이터를 불러왔습니다. (사진은 다시 등록해 주세요!)`);
+        alert(`✅ ${d.dong}동 ${d.ho}호 데이터와 사진을 완벽하게 불러왔습니다!`);
     }
 
     function delLocal(i) { savedList.splice(i, 1); updateTable(); }
@@ -285,11 +259,8 @@
             const el = document.getElementById('pdf-template'); el.style.display = 'block';
             
             const pdf = await html2pdf().set({ 
-                margin: 0, 
-                filename: `보고서_${d.dong}동_${d.ho}호.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true }, 
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
+                margin: 0, filename: `보고서_${d.dong}동_${d.ho}호.pdf`, image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
             }).from(el).output('datauristring');
             
             el.style.display = 'none';
@@ -297,7 +268,7 @@
             const r = await fetch(MY_GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
             const j = await r.json();
             if(j.result==='success') { alert("✅ 전송 완료!"); location.reload(); }
-        } catch(e) { alert("❌ 전송 실패"); btn.disabled = false; btn.innerText = "🚀 최종 전송 (PDF+사진4종)"; console.error(e); }
+        } catch(e) { alert("❌ 전송 실패"); btn.disabled = false; btn.innerText = "🚀 최종 전송 (PDF+사진4종)"; }
     }
     
     function clearInputs() { ['dong','ho','loc','work','type','contractor','desc'].forEach(id => document.getElementById(id).value=''); [1,2,3].forEach(i => { document.getElementById('p'+i).style.display='none'; document.getElementById('t'+i).style.display='block'; document.getElementById('p'+i).src=''; }); }
