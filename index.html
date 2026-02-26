@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>(주)METRO R&S 현장관리 시스템 V2.7</title>
+    <title>(주)METRO R&S 현장관리 시스템 V2.8</title>
     
     <script>
         var userAgent = navigator.userAgent.toLowerCase();
@@ -98,21 +98,7 @@
         .action-btn.del { background: #fee2e2; color: var(--danger); }
         .action-btn:hover { filter: brightness(0.95); transform: translateY(-1px); }
 
-        /* 💡 핵심 변경: left를 0으로 되돌리되, z-index를 -9999로 주어 화면 최하단으로 깔아버립니다 (백지 오류 완벽 수정) */
-        #pdf-template { 
-            display: none; 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            z-index: -9999; 
-            width: 794px; 
-            height: 1122px; 
-            padding: 40px; 
-            background: white; 
-            font-family: 'Malgun Gothic', sans-serif; 
-            box-sizing: border-box; 
-            overflow: hidden; 
-        }
+        #pdf-template { display: none; position: absolute; top: 0; left: 0; z-index: -9999; width: 794px; height: 1122px; padding: 40px; background: white; font-family: 'Malgun Gothic', sans-serif; box-sizing: border-box; overflow: hidden; }
     </style>
 </head>
 <body>
@@ -120,7 +106,7 @@
 <header>
     <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
         <img src="logo.png" alt="METRO" style="height: 24px; border-radius: 4px;" onerror="this.src='https://via.placeholder.com/100x30?text=METRO+R%26S'">
-        <span>(주)METRO R&S 현장관리 시스템 V2.7</span>
+        <span>(주)METRO R&S 현장관리 시스템 V2.8</span>
     </div>
 </header>
 
@@ -197,8 +183,8 @@
 </div>
 
 <script>
-    // 🚨 반드시 대표님의 Apps Script 웹앱 URL이 맞는지 확인하세요!
-    const MY_GAS_URL = "https://script.google.com/macros/s/AKfycbyfvRyEKhbbH9s6F7p9YT7BaUSwNkkJaLzydpte09vCCvCz7nfBUN6zyFUwMFBppVLA/exec"; 
+    // 💡 대표님께서 방금 알려주신 '진짜 독립 서버'의 웹앱 주소로 완벽하게 교체되었습니다!
+    const MY_GAS_URL = "https://script.google.com/macros/s/AKfycbyE1jMEzrix8xYu3_lgHUX8Oqm6TAtWP6RDZzZ2WFL9c6Crlz5BFTO7__JoFygqRwUD/exec"; 
     
     let cloudDB = {}; let currentSid = ""; let savedList = [];
     let editingIndex = -1; 
@@ -227,7 +213,6 @@
             if(j.result==='success') {
                 cloudDB = j.data; d.innerHTML = '<option value="">📑 공종을 선택하세요</option>';
                 Object.keys(cloudDB).forEach(n => {
-                    // '작업기록' 시트는 공종 목록에 뜨지 않도록 숨깁니다.
                     if (n !== "작업기록") {
                         d.innerHTML += `<option value="${n}">${n}</option>`;
                     }
@@ -394,7 +379,7 @@
             document.getElementById('pdf-p1').src = d.p1 || ""; document.getElementById('pdf-p2').src = d.p2 || "";
             
             const el = document.getElementById('pdf-template'); 
-            el.style.display = 'block'; // 화면 최하단(z-index:-9999)에 살짝 띄웁니다.
+            el.style.display = 'block'; 
             
             const pdf = await html2pdf().set({ 
                 margin: 0, filename: `보고서_${d.dong}동_${d.ho}호.pdf`, image: { type: 'jpeg', quality: 0.98 },
