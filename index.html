@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>(주)METRO R&S 현장관리 시스템 V2.0</title>
+    <title>(주)METRO R&S 현장관리 시스템 V2.2</title>
     
     <meta property="og:title" content="(주)METRO R&S 현장관리 시스템">
     <meta property="og:description" content="현장 사진 촬영부터 PDF 보고서 자동 생성, 구글 드라이브 분류까지 한 번에 처리하는 통합 솔루션">
@@ -96,7 +96,7 @@
 <header>
     <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
         <img src="logo.png" alt="METRO" style="height: 24px; border-radius: 4px;" onerror="this.src='https://via.placeholder.com/100x30?text=METRO+R%26S'">
-        <span>(주)METRO R&S 현장관리 시스템 V2.0</span>
+        <span>(주)METRO R&S 현장관리 시스템 V2.2</span>
     </div>
 </header>
 
@@ -188,7 +188,10 @@
             const j = await r.json();
             if(j.result==='success') {
                 s.innerHTML = `<option value="">🏢 현장을 선택해주세요</option>`;
+                
+                // 💡 서버에서 '메인관리' 시트의 목록만 딱 골라서 보내주므로 그대로 출력만 하면 됩니다!
                 j.sites.forEach(v => s.innerHTML += `<option value="${v.id}">${v.name}</option>`);
+                
             } else { throw new Error(j.message); }
         } catch(e) { s.innerHTML = '<option value="">❌ 로드 실패 (로그인/권한 확인)</option>'; }
     }
