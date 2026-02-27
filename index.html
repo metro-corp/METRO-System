@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>(주)METRO R&S 현장관리 시스템 V4.2</title>
+    <title>(주)METRO R&S 현장관리 시스템 V4.3</title>
     
     <script>
         var userAgent = navigator.userAgent.toLowerCase();
@@ -86,7 +86,7 @@
 <header>
     <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
         <img src="logo.png" alt="METRO" style="height: 24px; border-radius: 4px;" onerror="this.src='https://via.placeholder.com/100x30?text=METRO+R%26S'">
-        <span>(주)METRO R&S 현장관리 시스템 V4.2</span>
+        <span>(주)METRO R&S 현장관리 시스템 V4.3</span>
     </div>
 </header>
 
@@ -148,12 +148,34 @@
 
 <div id="pdf-template">
     <h2 style="text-align:center; margin-top:0; margin-bottom:15px; font-size:24px;">하자보수 작업 완료 사진대지</h2>
-    <table style="width:100%; border-collapse:collapse; border:2px solid #000; font-size:14px; margin-top:0;">
-        <tr><td style="border:1px solid #000; padding:8px; background:#eee; font-weight:bold; width:15%;">일자</td><td id="pdf-date" style="border:1px solid #000; padding:8px; width:35%;"></td><td style="border:1px solid #000; padding:8px; background:#eee; font-weight:bold; width:15%;">시공업체</td><td id="pdf-contractor" style="border:1px solid #000; padding:8px; width:35%;"></td></tr>
-        <tr><td style="border:1px solid #000; padding:8px; background:#eee; font-weight:bold;">현장명</td><td id="pdf-site" colspan="3" style="border:1px solid #000; padding:8px;"></td></tr>
-        <tr><td style="border:1px solid #000; padding:8px; background:#eee; font-weight:bold;">동/호</td><td id="pdf-unit" style="border:1px solid #000; padding:8px;"></td><td style="border:1px solid #000; padding:8px; background:#eee; font-weight:bold;">위치</td><td id="pdf-loc" style="border:1px solid #000; padding:8px;"></td></tr>
-        <tr><td style="border:1px solid #000; padding:8px; background:#eee; font-weight:bold;">설명</td><td id="pdf-desc" colspan="3" style="border:1px solid #000; padding:8px; height:50px;"></td></tr>
+    
+    <table style="width:100%; border-collapse:collapse; border:2px solid #000; font-size:14px; margin-top:0; text-align:center;">
+        <tr>
+            <td style="border:1px solid #000; padding:8px; background:#eee; font-weight:bold; width:15%;">현장명</td>
+            <td id="pdf-site" colspan="3" style="border:1px solid #000; padding:8px;"></td>
+        </tr>
+        <tr>
+            <td style="border:1px solid #000; padding:8px; background:#eee; font-weight:bold; width:15%;">동/호</td>
+            <td id="pdf-unit" style="border:1px solid #000; padding:8px; width:35%;"></td>
+            <td style="border:1px solid #000; padding:8px; background:#eee; font-weight:bold; width:15%;">위치</td>
+            <td id="pdf-loc" style="border:1px solid #000; padding:8px; width:35%;"></td>
+        </tr>
+        <tr>
+            <td style="border:1px solid #000; padding:8px; background:#eee; font-weight:bold;">공종</td>
+            <td id="pdf-work" style="border:1px solid #000; padding:8px;"></td>
+            <td style="border:1px solid #000; padding:8px; background:#eee; font-weight:bold;">시공업체</td>
+            <td id="pdf-contractor" style="border:1px solid #000; padding:8px;"></td>
+        </tr>
+        <tr>
+            <td style="border:1px solid #000; padding:8px; background:#eee; font-weight:bold;">일자</td>
+            <td id="pdf-date" colspan="3" style="border:1px solid #000; padding:8px;"></td>
+        </tr>
+        <tr>
+            <td style="border:1px solid #000; padding:8px; background:#eee; font-weight:bold;">내용</td>
+            <td id="pdf-desc" colspan="3" style="border:1px solid #000; padding:8px; height:50px;"></td>
+        </tr>
     </table>
+
     <div style="text-align:center; margin-top:15px;">
         <p style="font-weight:bold; margin-bottom:5px; font-size:16px;">[ 작 업 전 ]</p>
         <img id="pdf-p1" style="width:460px; height:340px; object-fit:contain; border:1px solid #000; display:block; margin:0 auto;">
@@ -189,7 +211,7 @@
                 if(d['p'+i] && d['p'+i].length > 100) {
                     let imgEl = document.getElementById('p'+i);
                     imgEl.src = d['p'+i];
-                    imgEl.dataset.raw = d['p'+i+'_raw'] || ""; // 💡 원본 데이터 복구
+                    imgEl.dataset.raw = d['p'+i+'_raw'] || ""; 
                     imgEl.style.display = 'block';
                     document.getElementById('t'+i).style.display = 'none';
                 }
@@ -296,7 +318,6 @@
                         else { sH = w / targetRatio; sY = (h - sH) / 2; }
                         c.width = 1200; c.height = 900; ctx.drawImage(img, sX, sY, sW, sH, 0, 0, 1200, 900);
                         
-                        // 💡 중요: 도장을 찍기 전의 '깨끗한 원본 사진'을 브라우저에 몰래 저장해 둡니다.
                         document.getElementById(pId).dataset.raw = c.toDataURL('image/jpeg', 0.8);
                         document.getElementById(pId).src = addWM(c);
                     }
@@ -324,7 +345,6 @@
         
         const d = getD(); 
         const vls = [d.site, `${d.dong}동 ${d.ho}호`, (d.desc||"").substring(0,35), d.work, d.date];
-        // 💡 '공 정'을 '공 종'으로 변경했습니다.
         const lbls = ["현 장", "위 치", "내 용", "공 종", "일 자"];
         
         for(let i=0; i<rows; i++) {
@@ -336,7 +356,6 @@
         return c.toDataURL('image/jpeg', 0.6); 
     }
 
-    // 💡 전송/저장 버튼을 누르는 순간, 숨겨둔 원본 사진을 꺼내어 '최신 글씨'로 도장을 다시 찍는 마법의 함수!
     async function applyFinalWatermark() {
         return new Promise((resolve) => {
             let targets = ['p1', 'p2'].filter(id => document.getElementById(id).dataset.raw && document.getElementById(id).dataset.raw.length > 100);
@@ -351,7 +370,7 @@
                     c.width = 1200; c.height = 900;
                     const ctx = c.getContext('2d');
                     ctx.drawImage(tempImg, 0, 0);
-                    imgEl.src = addWM(c); // 방금 수정한 최신 텍스트로 도장 찍기!
+                    imgEl.src = addWM(c); 
                     processed++;
                     if(processed === targets.length) resolve();
                 };
@@ -364,7 +383,7 @@
         return { 
             date: document.getElementById('today-date').value, site: document.getElementById('site').value, dong: document.getElementById('dong').value, ho: document.getElementById('ho').value, loc: document.getElementById('loc').value, work: document.getElementById('work').value, type: document.getElementById('type').value, contractor: document.getElementById('contractor').value, desc: document.getElementById('desc').value,
             p1: document.getElementById('p1').src, 
-            p1_raw: document.getElementById('p1').dataset.raw || "", // 원본 사진도 함께 묶어서 관리
+            p1_raw: document.getElementById('p1').dataset.raw || "", 
             p2: document.getElementById('p2').src, 
             p2_raw: document.getElementById('p2').dataset.raw || "",
             p3: document.getElementById('p3').src 
@@ -376,7 +395,7 @@
         
         document.getElementById('generating-badge').innerText = "⏳ 데이터 정리 중...";
         document.getElementById('generating-badge').style.display = 'block';
-        await applyFinalWatermark(); // 저장 직전 워터마크 최신화
+        await applyFinalWatermark(); 
         document.getElementById('generating-badge').style.display = 'none';
 
         const d = getD(); 
@@ -416,14 +435,13 @@
             const imgEl = document.getElementById('p' + num); const textEl = document.getElementById('t' + num); const imgSrc = d['p' + num];
             if (imgSrc && imgSrc.length > 100) { 
                 imgEl.src = imgSrc; 
-                imgEl.dataset.raw = d['p' + num + '_raw'] || ""; // 원본 사진도 다시 불러오기
+                imgEl.dataset.raw = d['p' + num + '_raw'] || ""; 
                 imgEl.style.display = 'block'; textEl.style.display = 'none'; 
             } else { 
                 imgEl.src = ''; imgEl.dataset.raw = ''; imgEl.style.display = 'none'; textEl.style.display = 'block'; 
             }
         });
         
-        // 완료확인서는 워터마크가 없으므로 별도 처리
         if (d.p3 && d.p3.length > 100) { document.getElementById('p3').src = d.p3; document.getElementById('p3').style.display = 'block'; document.getElementById('t3').style.display = 'none'; } 
         else { document.getElementById('p3').src = ''; document.getElementById('p3').style.display = 'none'; document.getElementById('t3').style.display = 'block'; }
         
@@ -468,7 +486,6 @@
         if(isProcessingImage) return alert("⏳ 아이폰 사진 처리가 진행 중입니다.\n잠시만 기다리신 후 다시 눌러주세요!");
         const btn = document.getElementById('btn-send'); 
         
-        // 전송 조건 1차 확인
         const d_init = getD();
         if(!currentSid || !d_init.dong || !d_init.ho) return alert("현장 및 정보를 확인하세요.");
         
@@ -481,21 +498,25 @@
         window.scrollTo(0, 0);
 
         try {
-            // 💡 전송 직전 마법! 사진에 가장 최신 글씨로 도장을 다시 쾅! 찍습니다.
             await applyFinalWatermark();
             
-            // 새롭게 갱신된 데이터를 긁어옵니다.
             const d = getD();
-            
             let hasPhotos = (d.p1 && d.p1.length > 100) || (d.p2 && d.p2.length > 100);
             let pdfBase64Data = "";
 
             if (hasPhotos) {
                 document.getElementById('generating-badge').innerText = "⏳ 사진대지 생성 중...";
-                document.getElementById('pdf-date').innerText = d.date; document.getElementById('pdf-contractor').innerText = d.contractor;
-                document.getElementById('pdf-site').innerText = d.site; document.getElementById('pdf-unit').innerText = `${d.dong}동 ${d.ho}호`;
-                document.getElementById('pdf-loc').innerText = d.loc; document.getElementById('pdf-desc').innerText = d.desc;
-                document.getElementById('pdf-p1').src = d.p1 || ""; document.getElementById('pdf-p2').src = d.p2 || "";
+                
+                // 💡 새롭게 구성된 사진대지 표에 데이터를 꽂아 넣습니다!
+                document.getElementById('pdf-site').innerText = d.site;
+                document.getElementById('pdf-unit').innerText = `${d.dong}동 ${d.ho}호`;
+                document.getElementById('pdf-loc').innerText = d.loc;
+                document.getElementById('pdf-work').innerText = d.work; // 공종 추가
+                document.getElementById('pdf-contractor').innerText = d.contractor;
+                document.getElementById('pdf-date').innerText = d.date;
+                document.getElementById('pdf-desc').innerText = d.desc;
+                document.getElementById('pdf-p1').src = d.p1 || ""; 
+                document.getElementById('pdf-p2').src = d.p2 || "";
                 
                 const el = document.getElementById('pdf-template'); 
                 el.style.display = 'block'; 
