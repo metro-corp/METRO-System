@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>(주)METRO R&S 현장관리 시스템 V4.4</title>
+    <title>(주)METRO R&S 현장관리 시스템 V4.5</title>
     
     <script>
         var userAgent = navigator.userAgent.toLowerCase();
@@ -77,16 +77,41 @@
 
         #pdf-template { display: none; width: 794px; height: 1122px; padding: 40px; background: white; font-family: 'Malgun Gothic', sans-serif; box-sizing: border-box; margin: 0 auto; }
         #generating-badge { display: none; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--primary-dark); color: white; padding: 14px 28px; border-radius: 30px; font-weight: 800; z-index: 10000; box-shadow: 0 10px 30px rgba(0,0,0,0.3); font-size: 16px; white-space: nowrap; }
+
+        /* 💡 깔끔하고 세련된 자체 제작 팝업창(Modal) 스타일 */
+        #custom-alert {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.6); z-index: 10005; backdrop-filter: blur(3px);
+            justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;
+            opacity: 0; transition: opacity 0.2s ease;
+        }
+        #custom-alert.show { display: flex; opacity: 1; }
+        .custom-alert-box {
+            background: white; padding: 25px 20px 20px; border-radius: 20px; text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2); max-width: 320px; width: 100%;
+            transform: translateY(20px) scale(0.95); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #custom-alert.show .custom-alert-box { transform: translateY(0) scale(1); }
+        .custom-alert-msg { font-size: 16px; font-weight: 700; color: var(--primary-dark); margin-bottom: 22px; line-height: 1.5; white-space: pre-wrap; word-break: keep-all; }
+        .custom-alert-btn { background: var(--accent); color: white; border: none; padding: 14px 0; width: 100%; border-radius: 12px; font-size: 16px; font-weight: 800; cursor: pointer; transition: background 0.2s; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2); }
+        .custom-alert-btn:active { transform: scale(0.97); }
     </style>
 </head>
 <body>
+
+<div id="custom-alert">
+    <div class="custom-alert-box">
+        <div class="custom-alert-msg" id="alert-msg">메시지 내용</div>
+        <button class="custom-alert-btn" onclick="closeAlert()">확인</button>
+    </div>
+</div>
 
 <div id="generating-badge">⏳ 문서 생성 및 전송 중...</div>
 
 <header>
     <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
         <img src="logo.png" alt="METRO" style="height: 24px; border-radius: 4px;" onerror="this.src='https://via.placeholder.com/100x30?text=METRO+R%26S'">
-        <span>(주)METRO R&S 현장관리 시스템 V4.4</span>
+        <span>(주)METRO R&S 현장관리 시스템 V4.5</span>
     </div>
 </header>
 
@@ -197,6 +222,20 @@
     let editingIndex = -1; 
     let isProcessingImage = false; 
 
+    // 💡 투박한 브라우저 알림창 대신 예쁜 커스텀 팝업을 띄우는 함수!
+    function showMsg(msg) {
+        document.getElementById('alert-msg').innerText = msg;
+        const alertEl = document.getElementById('custom-alert');
+        alertEl.style.display = 'flex';
+        setTimeout(() => alertEl.classList.add('show'), 10);
+    }
+
+    function closeAlert() {
+        const alertEl = document.getElementById('custom-alert');
+        alertEl.classList.remove('show');
+        setTimeout(() => alertEl.style.display = 'none', 200);
+    }
+
     window.onload = async () => { 
         document.getElementById('today-date').value = new Date().toISOString().substring(0, 10);
         
@@ -302,7 +341,6 @@
             const txt = document.getElementById(tId);
             const originalLabel = pId === 'p1' ? '작업 전' : (pId === 'p2' ? '작업 후' : '완료확인서');
             
-            // 💡 여기서 내부 내용을 완전히 교체합니다
             txt.innerHTML = "<div style='font-size: 24px;'>⏳</div><span>처리중...</span>";
             txt.style.display = 'block';
             document.getElementById(pId).style.display = 'none';
@@ -330,7 +368,6 @@
                     
                     document.getElementById(pId).style.display='block'; 
                     txt.style.display='none';
-                    // 💡 처리가 끝나면 다시 원래 아이콘과 텍스트로 덮어씁니다 (중복 방지 핵심!)
                     txt.innerHTML = `<div style="font-size: 24px;">${pId==='p3'?'📋':'📷'}</div><span>${originalLabel}</span>`;
                     
                     isProcessingImage = false; 
@@ -398,7 +435,7 @@
     }
 
     async function saveLocal() {
-        if(isProcessingImage) return alert("⏳ 아이폰 사진 처리가 진행 중입니다.\n1~2초만 기다리신 후 다시 눌러주세요!");
+        if(isProcessingImage) return showMsg("⏳ 아이폰 사진 처리가 진행 중입니다.\n1~2초만 기다리신 후 다시 눌러주세요!");
         
         document.getElementById('generating-badge').innerText = "⏳ 데이터 정리 중...";
         document.getElementById('generating-badge').style.display = 'block';
@@ -406,14 +443,14 @@
         document.getElementById('generating-badge').style.display = 'none';
 
         const d = getD(); 
-        if(!d.dong || !d.ho) return alert("동, 호수 정보를 입력하세요.");
+        if(!d.dong || !d.ho) return showMsg("동, 호수 정보를 입력하세요.");
         if (editingIndex > -1) { savedList[editingIndex] = d; } else { savedList.push(d); }
         
         try {
             localStorage.setItem('metro_savedList', JSON.stringify(savedList));
             updateTable(); clearInputs(true);
         } catch(e) {
-            alert("❌ 스마트폰 저장 공간이 가득 찼습니다.\n전송이 완료된 임시 목록을 먼저 삭제해 주세요!");
+            showMsg("❌ 스마트폰 저장 공간이 가득 찼습니다.\n전송이 완료된 임시 목록을 먼저 삭제해 주세요!");
             if(editingIndex === -1) savedList.pop(); 
         }
     }
@@ -490,11 +527,11 @@
     }
 
     async function send() {
-        if(isProcessingImage) return alert("⏳ 아이폰 사진 처리가 진행 중입니다.\n잠시만 기다리신 후 다시 눌러주세요!");
+        if(isProcessingImage) return showMsg("⏳ 아이폰 사진 처리가 진행 중입니다.\n잠시만 기다리신 후 다시 눌러주세요!");
         const btn = document.getElementById('btn-send'); 
         
         const d_init = getD();
-        if(!currentSid || !d_init.dong || !d_init.ho) return alert("현장 및 정보를 확인하세요.");
+        if(!currentSid || !d_init.dong || !d_init.ho) return showMsg("현장, 동, 호수 정보를 확인하세요.");
         
         btn.innerHTML = "⏳ 준비 중..."; btn.style.pointerEvents = "none"; btn.style.opacity = "0.8";
         
@@ -556,12 +593,12 @@
             document.getElementById('generating-badge').style.display = 'none';
 
             if(j.result==='success') { 
-                alert("🎉 성공적으로 전송되었습니다!"); 
+                showMsg("🎉 성공적으로 전송되었습니다!"); 
                 if (editingIndex > -1) { savedList.splice(editingIndex, 1); localStorage.setItem('metro_savedList', JSON.stringify(savedList)); updateTable(); }
                 resetAfterSend(); 
                 btn.innerHTML = "🚀 최종 전송"; btn.style.pointerEvents = "auto"; btn.style.opacity = "1"; 
             } else {
-                alert("❌ 서버 오류: " + j.message);
+                showMsg("❌ 서버 오류: " + j.message);
                 btn.innerHTML = "🚀 최종 전송"; btn.style.pointerEvents = "auto"; btn.style.opacity = "1"; 
             }
         } catch(e) {
@@ -569,7 +606,7 @@
             document.querySelector('header').style.display = 'block';
             document.getElementById('generating-badge').style.display = 'none';
             document.getElementById('pdf-template').style.display = 'none';
-            alert("❌ 처리 중 오류가 발생했습니다."); 
+            showMsg("❌ 처리 중 오류가 발생했습니다."); 
             btn.innerHTML = "🚀 최종 전송"; btn.style.pointerEvents = "auto"; btn.style.opacity = "1"; 
         }
     }
