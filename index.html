@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>(주)METRO R&S 현장관리 시스템 V5.3</title>
+    <title>(주)METRO R&S 현장관리 시스템 V5.4</title>
     
     <script>
         var userAgent = navigator.userAgent.toLowerCase();
@@ -75,7 +75,6 @@
         .action-btn { background: #e2e8f0; color: var(--primary-dark); padding: 6px 10px; border-radius: 8px; font-size: 12px; font-weight: 700; border: none; cursor: pointer; transition: all 0.2s; flex: 1; white-space: nowrap; word-break: keep-all; }
         .action-btn.del { background: #fee2e2; color: var(--danger); }
 
-        /* 💡 V5.3 하단 여백 확보: padding-bottom을 80px로 넉넉하게 주어 바닥에 붙는 현상 해결 */
         #pdf-template { 
             display: none; width: 794px; height: 1122px; padding: 40px 40px 80px 40px; 
             background: white; font-family: 'Malgun Gothic', sans-serif; box-sizing: border-box; margin: 0 auto; 
@@ -115,7 +114,7 @@
 <header>
     <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
         <img src="logo.png" alt="METRO" style="height: 24px; border-radius: 4px;" onerror="this.src='https://via.placeholder.com/100x30?text=METRO+R%26S'">
-        <span>(주)METRO R&S 현장관리 시스템 V5.3</span>
+        <span>(주)METRO R&S 현장관리 시스템 V5.4</span>
     </div>
 </header>
 
@@ -488,7 +487,12 @@
         document.getElementById('generating-badge').style.display = 'none';
 
         const d = getD(); 
-        if(!d.dong || !d.ho) return showMsg("동, 호수 정보를 입력하세요.");
+        
+        // 💡 임시 저장 시에도 모든 텍스트 칸 빈칸 여부 철저히 검사!
+        if(!currentSid || !d.dong || !d.ho || !d.loc || !d.work || !d.type || !d.contractor || !d.desc) {
+            return showMsg("🚨 필수 정보 누락!\n현장, 동/호수, 위치, 공종, 하자유형, 시공업체, 작업내용을 빠짐없이 입력해 주세요.");
+        }
+
         if (editingIndex > -1) { savedList[editingIndex] = d; } else { savedList.push(d); }
         
         try {
@@ -576,9 +580,11 @@
         const btn = document.getElementById('btn-send'); 
         
         const d_init = getD();
+        
+        // 💡 최종 전송 시에도 모든 텍스트 칸 빈칸 여부 철저히 검사!
         if(!currentSid || !d_init.dong || !d_init.ho || !d_init.loc || !d_init.work || !d_init.type || !d_init.contractor || !d_init.desc) {
-    return showMsg("🚨 빈칸이 있습니다!\n모든 작업 정보를 빠짐없이 입력해 주세요.");
-}
+            return showMsg("🚨 필수 정보 누락!\n현장, 동/호수, 위치, 공종, 하자유형, 시공업체, 작업내용을 빠짐없이 입력해 주세요.");
+        }
         
         btn.innerHTML = "⏳ 준비 중..."; btn.style.pointerEvents = "none"; btn.style.opacity = "0.8";
         
@@ -592,6 +598,8 @@
             await applyFinalWatermark();
             
             const d = getD();
+            
+            // 💡 사진이 없는 경우에는 PDF를 생성하지 않는 로직은 그대로 유지!
             let hasPhotos = (d.p1 && d.p1.length > 100) || (d.p2 && d.p2.length > 100);
             let pdfBase64Data = "";
 
