@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>(주)METRO R&S 현장관리 시스템 V5.4</title>
+    <title>(주)METRO R&S 현장관리 시스템 V5.5</title>
     
     <script>
         var userAgent = navigator.userAgent.toLowerCase();
@@ -114,7 +114,7 @@
 <header>
     <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
         <img src="logo.png" alt="METRO" style="height: 24px; border-radius: 4px;" onerror="this.src='https://via.placeholder.com/100x30?text=METRO+R%26S'">
-        <span>(주)METRO R&S 현장관리 시스템 V5.4</span>
+        <span>(주)METRO R&S 현장관리 시스템 V5.5</span>
     </div>
 </header>
 
@@ -263,6 +263,8 @@
                     let imgEl = document.getElementById('p'+i);
                     imgEl.src = d['p'+i];
                     imgEl.dataset.raw = d['p'+i+'_raw'] || ""; 
+                    // 💡 저장된 워터마크 여부 복원
+                    imgEl.dataset.wm = d['p'+i+'_wm'] !== undefined ? d['p'+i+'_wm'] : "true";
                     imgEl.style.display = 'block';
                     document.getElementById('t'+i).style.display = 'none';
                 }
@@ -345,6 +347,13 @@
 
     function proc(input, pId, tId) {
         if(input.files && input.files[0]) {
+            // 💡 V5.5 핵심: 사진 선택 시 워터마크 여부 묻기
+            let applyWm = true;
+            if(pId === 'p1' || pId === 'p2') {
+                // 사용자가 [확인]을 누르면 true, [취소]를 누르면 false가 됩니다.
+                applyWm = confirm("📷 사진에 현장 정보(워터마크)를 추가하시겠습니까?\n\n[확인] 워터마크 표기\n[취소] 원본 사진 유지");
+            }
+            
             isProcessingImage = true; 
             const txt = document.getElementById(tId);
             const originalLabel = pId === 'p1' ? '작업 전' : (pId === 'p2' ? '작업 후' : '완료확인서');
@@ -371,7 +380,15 @@
                         c.width = 1200; c.height = 900; ctx.drawImage(img, sX, sY, sW, sH, 0, 0, 1200, 900);
                         
                         document.getElementById(pId).dataset.raw = c.toDataURL('image/jpeg', 0.8);
-                        document.getElementById(pId).src = addWM(c);
+                        // 💡 선택한 결과(워터마크 여부)를 사진 데이터에 저장해둡니다.
+                        document.getElementById(pId).dataset.wm = applyWm ? "true" : "false";
+                        
+                        // 사용자가 확인(true)을 누른 경우에만 도장을 찍어 보여줍니다.
+                        if(applyWm) {
+                            document.getElementById(pId).src = addWM(c);
+                        } else {
+                            document.getElementById(pId).src = document.getElementById(pId).dataset.raw;
+                        }
                     }
                     
                     document.getElementById(pId).style.display='block'; 
@@ -446,7 +463,10 @@
 
     async function applyFinalWatermark() {
         return new Promise((resolve) => {
-            let targets = ['p1', 'p2'].filter(id => document.getElementById(id).dataset.raw && document.getElementById(id).dataset.raw.length > 100);
+            // 💡 전송 시 텍스트 내용이 바뀌었을 경우를 대비해 워터마크를 다시 찍는 부분
+            // 여기서 워터마크 여부(.wm === "true")인 사진만 걸러냅니다!
+            let targets = ['p1', 'p2'].filter(id => document.getElementById(id).dataset.raw && document.getElementById(id).dataset.raw.length > 100 && document.getElementById(id).dataset.wm === "true");
+            
             if(targets.length === 0) return resolve();
 
             let processed = 0;
@@ -472,8 +492,10 @@
             date: document.getElementById('today-date').value, site: document.getElementById('site').value, dong: document.getElementById('dong').value, ho: document.getElementById('ho').value, loc: document.getElementById('loc').value, work: document.getElementById('work').value, type: document.getElementById('type').value, contractor: document.getElementById('contractor').value, desc: document.getElementById('desc').value,
             p1: document.getElementById('p1').src, 
             p1_raw: document.getElementById('p1').dataset.raw || "", 
+            p1_wm: document.getElementById('p1').dataset.wm || "true", // 💡 워터마크 상태 저장
             p2: document.getElementById('p2').src, 
             p2_raw: document.getElementById('p2').dataset.raw || "",
+            p2_wm: document.getElementById('p2').dataset.wm || "true", // 💡 워터마크 상태 저장
             p3: document.getElementById('p3').src 
         }; 
     }
@@ -487,8 +509,6 @@
         document.getElementById('generating-badge').style.display = 'none';
 
         const d = getD(); 
-        
-        // 💡 임시 저장 시에도 모든 텍스트 칸 빈칸 여부 철저히 검사!
         if(!currentSid || !d.dong || !d.ho || !d.loc || !d.work || !d.type || !d.contractor || !d.desc) {
             return showMsg("🚨 필수 정보 누락!\n현장, 동/호수, 위치, 공종, 하자유형, 시공업체, 작업내용을 빠짐없이 입력해 주세요.");
         }
@@ -529,9 +549,10 @@
             if (imgSrc && imgSrc.length > 100) { 
                 imgEl.src = imgSrc; 
                 imgEl.dataset.raw = d['p' + num + '_raw'] || ""; 
+                imgEl.dataset.wm = d['p' + num + '_wm'] !== undefined ? d['p' + num + '_wm'] : "true"; // 💡 불러올 때 세팅
                 imgEl.style.display = 'block'; textEl.style.display = 'none'; 
             } else { 
-                imgEl.src = ''; imgEl.dataset.raw = ''; imgEl.style.display = 'none'; textEl.style.display = 'block'; 
+                imgEl.src = ''; imgEl.dataset.raw = ''; imgEl.dataset.wm = "true"; imgEl.style.display = 'none'; textEl.style.display = 'block'; 
             }
         });
         
@@ -547,7 +568,7 @@
         ['dong','ho','loc','work','type','contractor','desc'].forEach(id => document.getElementById(id).value=''); 
         [1,2,3].forEach(i => { 
             let el = document.getElementById('p'+i);
-            el.style.display='none'; el.src=''; el.dataset.raw=''; 
+            el.style.display='none'; el.src=''; el.dataset.raw=''; el.dataset.wm='true';
             document.getElementById('t'+i).style.display='block'; 
         }); 
         editingIndex = -1; 
@@ -559,7 +580,7 @@
         ['dong','ho','loc','type','contractor','desc'].forEach(id => document.getElementById(id).value=''); 
         [1,2,3].forEach(i => { 
             let el = document.getElementById('p'+i);
-            el.style.display='none'; el.src=''; el.dataset.raw=''; 
+            el.style.display='none'; el.src=''; el.dataset.raw=''; el.dataset.wm='true';
             document.getElementById('t'+i).style.display='block'; 
         }); 
         editingIndex = -1; 
@@ -580,8 +601,6 @@
         const btn = document.getElementById('btn-send'); 
         
         const d_init = getD();
-        
-        // 💡 최종 전송 시에도 모든 텍스트 칸 빈칸 여부 철저히 검사!
         if(!currentSid || !d_init.dong || !d_init.ho || !d_init.loc || !d_init.work || !d_init.type || !d_init.contractor || !d_init.desc) {
             return showMsg("🚨 필수 정보 누락!\n현장, 동/호수, 위치, 공종, 하자유형, 시공업체, 작업내용을 빠짐없이 입력해 주세요.");
         }
@@ -599,7 +618,6 @@
             
             const d = getD();
             
-            // 💡 사진이 없는 경우에는 PDF를 생성하지 않는 로직은 그대로 유지!
             let hasPhotos = (d.p1 && d.p1.length > 100) || (d.p2 && d.p2.length > 100);
             let pdfBase64Data = "";
 
