@@ -576,7 +576,9 @@
         const btn = document.getElementById('btn-send'); 
         
         const d_init = getD();
-        if(!currentSid || !d_init.dong || !d_init.ho) return showMsg("현장, 동, 호수 정보를 확인하세요.");
+        if(!currentSid || !d_init.dong || !d_init.ho || !d_init.loc || !d_init.work || !d_init.type || !d_init.contractor || !d_init.desc) {
+    return showMsg("🚨 빈칸이 있습니다!\n모든 작업 정보를 빠짐없이 입력해 주세요.");
+}
         
         btn.innerHTML = "⏳ 준비 중..."; btn.style.pointerEvents = "none"; btn.style.opacity = "0.8";
         
