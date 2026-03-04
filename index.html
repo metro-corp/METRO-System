@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>(주)METRO R&S 현장관리 시스템 V5.6</title>
+    <title>(주)METRO R&S 현장관리 시스템 V5.7</title>
     
     <script>
         var userAgent = navigator.userAgent.toLowerCase();
@@ -119,7 +119,7 @@
 <header>
     <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
         <img src="logo.png" alt="METRO" style="height: 24px; border-radius: 4px;" onerror="this.src='https://via.placeholder.com/100x30?text=METRO+R%26S'">
-        <span>(주)METRO R&S 현장관리 시스템 V5.6</span>
+        <span>(주)METRO R&S 현장관리 시스템 V5.7</span>
     </div>
 </header>
 
@@ -226,7 +226,6 @@
             <td style="border:1px solid #000; padding:10px; background:#f4f4f4; font-weight:bold; text-align:center;">내용</td>
             <td id="pdf-desc" colspan="3" style="border:1px solid #000; padding:10px; text-align:left; vertical-align:top;"></td>
         </tr>
-        
         <tr>
             <td colspan="4" style="border:1px solid #000; padding: 15px 0; text-align: center; vertical-align: middle; height: 350px;">
                 <p style="font-weight:900; margin-top:0; margin-bottom:8px; font-size:16px;">[ 작 업 전 ]</p>
@@ -249,7 +248,6 @@
     let editingIndex = -1; 
     let isProcessingImage = false; 
 
-    // 💡 V5.6: 토글 버튼을 누르면 화면이 바뀌는 마법의 함수
     function toggleArea() {
         const type = document.querySelector('input[name="area-type"]:checked').value;
         const dongInput = document.getElementById('dong');
@@ -259,12 +257,12 @@
             dongInput.placeholder = "동";
             dongInput.classList.remove('full');
             hoInput.style.display = "block";
-            if(hoInput.value === "-") hoInput.value = ""; // 공용부에서 넘어올때 리셋
+            if(hoInput.value === "-") hoInput.value = ""; 
         } else {
             dongInput.placeholder = "공용부 상세 위치 (예: 지하 1층 주차장, 101동 공용현관)";
             dongInput.classList.add('full');
             hoInput.style.display = "none";
-            hoInput.value = "-"; // DB 구조 유지를 위한 꼼수
+            hoInput.value = "-"; 
         }
     }
 
@@ -293,12 +291,8 @@
         if(auto) {
             let d = JSON.parse(auto);
             
-            // 저장된 데이터가 공용부면 토글을 공용부로 변경
-            if(d.ho === "-") {
-                document.querySelector('input[name="area-type"][value="common"]').checked = true;
-            } else {
-                document.querySelector('input[name="area-type"][value="private"]').checked = true;
-            }
+            if(d.ho === "-") { document.querySelector('input[name="area-type"][value="common"]').checked = true; } 
+            else { document.querySelector('input[name="area-type"][value="private"]').checked = true; }
             toggleArea();
 
             ['date','dong','ho','loc','work','type','contractor','desc'].forEach(id => {
@@ -373,7 +367,6 @@
         
         if(!sheet || !d || (!isCommon && !h)) { res.style.display='none'; return; }
         
-        // 💡 V5.6: 공용부 검색 시에는 '호'를 무시하고 '동(입력내용)'으로만 부분 검색되도록 똑똑하게 변경!
         const matches = (cloudDB[sheet] || []).filter(v => {
             if (isCommon) return String(v.dong).includes(d) && String(v.ho) === "-";
             return String(v.dong) === d && String(v.ho) === h;
@@ -477,7 +470,6 @@
         ctx.fillStyle = "white"; ctx.fillRect(x, y, bw, totalH);
         ctx.lineWidth = 1; ctx.strokeStyle = "black"; ctx.strokeRect(x, y, bw, totalH);
 
-        // 💡 V5.6: 워터마크에도 공용부/전용부 텍스트 구분
         const locText = d.ho === "-" ? d.dong : `${d.dong}동 ${d.ho}호`;
         const vls = [d.site, locText, descLines, d.work, d.date];
         const lbls = ["현 장", "위 치", "내 용", "공 종", "일 자"];
@@ -573,7 +565,6 @@
     function updateTable() {
         const b = document.getElementById('list-body');
         b.innerHTML = savedList.length ? savedList.map((r, i) => {
-            // 💡 V5.6: 목록 표시할 때 공용부이면 이름 예쁘게 보여주기
             const locText = r.ho === "-" ? r.dong : `${r.dong}동 ${r.ho}호`;
             return `<tr><td style="font-weight:700; color:var(--text-sub);">${i+1}</td>
                 <td style="text-align:left; padding-left:10px; word-break:keep-all; white-space:nowrap;">
@@ -592,12 +583,8 @@
     function loadLocal(i) {
         const d = savedList[i];
         
-        // 💡 불러올 때 토글 스위치 상태 맞추기
-        if(d.ho === "-") {
-            document.querySelector('input[name="area-type"][value="common"]').checked = true;
-        } else {
-            document.querySelector('input[name="area-type"][value="private"]').checked = true;
-        }
+        if(d.ho === "-") { document.querySelector('input[name="area-type"][value="common"]').checked = true; } 
+        else { document.querySelector('input[name="area-type"][value="private"]').checked = true; }
         toggleArea();
 
         document.getElementById('today-date').value = d.date; document.getElementById('dong').value = d.dong; document.getElementById('ho').value = d.ho; document.getElementById('loc').value = d.loc; document.getElementById('work').value = d.work; document.getElementById('type').value = d.type; document.getElementById('contractor').value = d.contractor; document.getElementById('desc').value = d.desc;
@@ -624,7 +611,6 @@
     function clearInputs(isFullClear) { 
         ['dong','ho','loc','work','type','contractor','desc'].forEach(id => document.getElementById(id).value=''); 
         
-        // 리셋 후 전용부 모드로 초기화
         document.querySelector('input[name="area-type"][value="private"]').checked = true;
         toggleArea();
 
@@ -693,7 +679,6 @@
                 
                 document.getElementById('pdf-site').innerText = d.site;
                 
-                // 💡 V5.6: PDF 타이틀 똑똑하게 바꾸기
                 if(d.ho === "-") {
                     document.getElementById('pdf-unit-label').innerText = "공용부";
                     document.getElementById('pdf-unit').innerText = d.dong;
@@ -728,10 +713,15 @@
 
             document.getElementById('generating-badge').innerText = "🚀 서버에 전송 중입니다...";
 
+            // 💡 V5.7 핵심: 워터마크를 씌운 경우에만 원본(raw)을 서버로 쏴줍니다!
             const payload = { 
                 targetSheetId: currentSid, record: d, 
                 pdfBase64: pdfBase64Data, 
-                p1Base64: (d.p1||"").split(',')[1]||"", p2Base64: (d.p2||"").split(',')[1]||"", p3Base64: (d.p3||"").split(',')[1]||"" 
+                p1Base64: (d.p1||"").split(',')[1]||"", 
+                p1RawBase64: (d.p1_wm === "true") ? (d.p1_raw||"").split(',')[1]||"" : "",
+                p2Base64: (d.p2||"").split(',')[1]||"", 
+                p2RawBase64: (d.p2_wm === "true") ? (d.p2_raw||"").split(',')[1]||"" : "",
+                p3Base64: (d.p3||"").split(',')[1]||"" 
             };
             
             const r = await fetch(MY_GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
