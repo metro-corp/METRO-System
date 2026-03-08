@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <title>(주)METRO R&S 현장관리 시스템 V8.2</title>
+    <title>(주)METRO R&S 현장관리 시스템 V8.3</title>
     
     <script>
         var userAgent = navigator.userAgent.toLowerCase();
@@ -36,7 +36,6 @@
 
         body { font-family: 'Pretendard', sans-serif; margin: 0; background: var(--bg-body); font-size: 15px; color: var(--text-main); padding-bottom: 60px; line-height: 1.5; -webkit-tap-highlight-color: transparent; }
         
-        /* 💡 [V8.2 수정] 겹침 방지를 위해 sticky 제거 */
         header { background: linear-gradient(135deg, var(--primary-dark), var(--primary-light)); color: white; padding: 18px; font-weight: 700; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-size: 17px; }
         
         .container { padding: 15px; max-width: 800px; margin: auto; }
@@ -80,11 +79,9 @@
         th:first-child { border-top-left-radius: 12px; } th:last-child { border-top-right-radius: 12px; }
         tr:last-child td { border-bottom: none; }
         
-        /* 💡 [V8.2 디자인 복구] 목록 버튼 스타일을 V5.7 사양으로 원복 */
         .action-btn { background: #e2e8f0; color: var(--primary-dark); padding: 8px 12px; border-radius: 12px; font-size: 13px; font-weight: 800; border: none; cursor: pointer; transition: all 0.2s; flex: 1; white-space: nowrap; word-break: keep-all; }
         .action-btn.del { background: #fee2e2; color: var(--danger); }
 
-        /* 💡 [V8.2 핵심 수정] 사진대지 하단 잘림 해결을 위한 A4 정규 규격 강제 고정 */
         #pdf-template { 
             display: none; 
             width: 794px; 
@@ -94,17 +91,17 @@
             font-family: 'Malgun Gothic', sans-serif; 
             box-sizing: border-box; 
             margin: 0 auto; 
-            overflow: hidden; /* 페이지 넘침 절대 방지 */
+            overflow: hidden; 
             position: relative;
         }
         
         #generating-badge { display: none; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--primary-dark); color: white; padding: 14px 28px; border-radius: 30px; font-weight: 800; z-index: 10000; box-shadow: 0 10px 30px rgba(0,0,0,0.3); font-size: 16px; white-space: nowrap; }
 
-        #custom-alert { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 10005; backdrop-filter: blur(3px); justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; opacity: 0; transition: opacity 0.2s ease; }
-        #custom-alert.show { display: flex; opacity: 1; }
-        .custom-alert-box { background: white; padding: 25px 20px 20px; border-radius: 20px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.2); max-width: 320px; width: 100%; transform: translateY(20px) scale(0.95); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        #custom-alert.show .custom-alert-box { transform: translateY(0) scale(1); }
-        .custom-alert-msg { font-size: 16px; font-weight: 700; color: var(--primary-dark); margin-bottom: 22px; line-height: 1.5; white-space: pre-wrap; word-break: keep-all; }
+        #custom-alert, #notice-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 10005; backdrop-filter: blur(3px); justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; opacity: 0; transition: opacity 0.2s ease; }
+        #custom-alert.show, #notice-modal.show { display: flex; opacity: 1; }
+        .custom-alert-box { background: white; padding: 25px 20px 20px; border-radius: 20px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.2); max-width: 320px; width: 100%; transform: translateY(20px) scale(0.95); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; }
+        #custom-alert.show .custom-alert-box, #notice-modal.show .custom-alert-box { transform: translateY(0) scale(1); }
+        .custom-alert-msg { font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 22px; line-height: 1.5; white-space: pre-wrap; word-break: keep-all; }
         .custom-alert-btn { background: var(--accent); color: white; border: none; padding: 14px 0; width: 100%; border-radius: 12px; font-size: 16px; font-weight: 800; cursor: pointer; transition: background 0.2s; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2); }
     </style>
 </head>
@@ -112,8 +109,17 @@
 
 <div id="custom-alert">
     <div class="custom-alert-box">
-        <div class="custom-alert-msg" id="alert-msg">메시지 내용</div>
+        <div class="custom-alert-msg" id="alert-msg">1. 새로고침 후에는 잠시 기다려 주세요. 데이터가 로딩될 시간이 필요합니다.<br>2. 임시저장목록은 10건 정도 가능합니다.<br>3. 전송 속도를 개선했습니다.</div>
         <button class="custom-alert-btn" onclick="closeAlert()">확인</button>
+    </div>
+</div>
+
+<!-- 💡 [V8.3 추가] 공지사항 모달 구조 -->
+<div id="notice-modal">
+    <div class="custom-alert-box">
+        <div style="background: var(--accent); color: white; padding: 12px; border-radius: 12px 12px 0 0; margin: -25px -20px 20px; font-weight: 900; font-size: 15px; letter-spacing: 1px;">📢 공지사항</div>
+        <div class="custom-alert-msg" id="notice-msg" style="text-align: left; font-size: 14px; font-weight: 600;">안전한 현장 관리를 위해 매일 아침 보호구 착용 상태를 점검해 주세요. 사진대지 전송 시 네트워크 상태를 반드시 확인 바랍니다.</div>
+        <button class="custom-alert-btn" onclick="closeNotice()">확인 (오늘 하루 안 보기)</button>
     </div>
 </div>
 
@@ -122,7 +128,7 @@
 <header>
     <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
         <img src="logo.png" alt="METRO" style="height: 24px; border-radius: 4px;" onerror="this.src='https://placehold.co/100x30/0f172a/white?text=METRO+R%26S'">
-        <span>(주)METRO R&S 현장관리 시스템 V8.2</span>
+        <span>(주)METRO R&S 현장관리 시스템 V8.3</span>
     </div>
 </header>
 
@@ -201,7 +207,7 @@
     </div>
 </div>
 
-<!-- 💡 [V8.2 정밀 조정] 사진대지 템플릿 (하단 잘림 방지 최적화) -->
+<!-- PDF 템플릿 (하단 잘림 방지 최적화) -->
 <div id="pdf-template">
     <p style="text-align: center; font-size: 26px; font-weight: 900; margin-top: 0; margin-bottom: 20px; letter-spacing: 15px; font-family: 'Malgun Gothic', sans-serif;">사 진 대 지</p>
     <table style="width:100%; border-collapse:collapse; border:2px solid #000; font-size:14px; table-layout: fixed;">
@@ -265,6 +271,25 @@
     function showMsg(msg) { document.getElementById('alert-msg').innerText = msg; const alertEl = document.getElementById('custom-alert'); alertEl.style.display = 'flex'; setTimeout(() => alertEl.classList.add('show'), 10); }
     function closeAlert() { const alertEl = document.getElementById('custom-alert'); alertEl.classList.remove('show'); setTimeout(() => alertEl.style.display = 'none', 200); }
 
+    // 💡 [V8.3 추가] 공지사항 관리 함수
+    function checkNotice() {
+        const lastDate = localStorage.getItem('metro_notice_date');
+        const today = new Date().toISOString().split('T')[0];
+        if (lastDate !== today) {
+            const noticeEl = document.getElementById('notice-modal');
+            noticeEl.style.display = 'flex';
+            setTimeout(() => noticeEl.classList.add('show'), 10);
+        }
+    }
+
+    function closeNotice() {
+        const today = new Date().toISOString().split('T')[0];
+        localStorage.setItem('metro_notice_date', today);
+        const noticeEl = document.getElementById('notice-modal');
+        noticeEl.classList.remove('show');
+        setTimeout(() => noticeEl.style.display = 'none', 200);
+    }
+
     window.onload = async () => { 
         const now = new Date();
         const year = now.getFullYear();
@@ -303,6 +328,9 @@
             el.addEventListener('input', autoSave); 
             el.addEventListener('change', autoSave); 
         });
+
+        // 💡 [V8.3 추가] 로딩 완료 후 공지사항 체크
+        checkNotice();
     };
 
     function autoSave() { 
@@ -402,7 +430,7 @@
         const ctx = c.getContext('2d'), w = c.width, h = c.height;
         const boxW = 580, rowH = 40, col1W = 110;
         const totalH = rowH * 5;
-        const x = 0, y = h - totalH; // 💡 왼쪽 하단 여백 0 완전 밀착
+        const x = 0, y = h - totalH; 
 
         ctx.fillStyle = "rgba(255, 255, 255, 0.98)";
         ctx.fillRect(x, y, boxW, totalH);
@@ -420,8 +448,10 @@
         const values = [d.site || "현장명", (d.ho === "-" ? d.dong : `${d.dong}동 ${d.ho}호`) || "위치", (d.desc.substring(0, 24) + (d.desc.length > 24 ? "..." : "")) || "작업내용", d.work || "공종", d.date || "날짜"];
         ctx.fillStyle = "#000"; ctx.font = "bold 18px sans-serif"; ctx.textBaseline = "middle";
         labels.forEach((lbl, i) => {
-            ctx.textAlign = "center"; ctx.fillText(lbl, x + (col1W / 2), y + (i * rowH) + (rowH / 2));
-            ctx.textAlign = "left"; ctx.fillText(values[i], x + col1W + 15, y + (i * rowH) + (rowH / 2));
+            ctx.textAlign = "center";
+            ctx.fillText(lbl, x + (col1W / 2), y + (i * rowH) + (rowH / 2));
+            ctx.textAlign = "left";
+            ctx.fillText(values[i], x + col1W + 15, y + (i * rowH) + (rowH / 2));
         });
         return c.toDataURL('image/jpeg', 0.7);
     }
@@ -496,7 +526,6 @@
                 document.getElementById('pdf-loc').innerText = d.loc; document.getElementById('pdf-work').innerText = d.work; document.getElementById('pdf-contractor').innerText = d.contractor; document.getElementById('pdf-date').innerText = d.date; document.getElementById('pdf-desc').innerText = d.desc; document.getElementById('pdf-p1').src = d.p1 || ""; document.getElementById('pdf-p2').src = d.p2 || "";
                 const el = document.getElementById('pdf-template'); el.style.display = 'block'; await new Promise(resolve => setTimeout(resolve, 600)); 
                 
-                // 💡 [V8.2 정밀 수정] html2canvas 렌더링 폭 및 페이지 넘침 방지 고정
                 const pdf = await html2pdf().set({ 
                     margin: 0, 
                     html2canvas: { scale: 2, useCORS: true, windowWidth: 794 }, 
