@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <title>(주)METRO R&S 현장관리 시스템 V8.0</title>
+    <title>(주)METRO R&S 현장관리 시스템 V8.1</title>
     
     <script>
         var userAgent = navigator.userAgent.toLowerCase();
@@ -80,10 +80,18 @@
         .action-btn { background: #e2e8f0; color: var(--primary-dark); padding: 8px 12px; border-radius: 12px; font-size: 13px; font-weight: 800; border: none; cursor: pointer; transition: all 0.2s; flex: 1; white-space: nowrap; word-break: keep-all; }
         .action-btn.del { background: #fee2e2; color: var(--danger); }
 
-        /* 💡 [V8.0 수정] 사진대지 잘림 방지를 위해 고정 높이 제거 및 여백 조정 */
+        /* 💡 [V8.1 핵심 수정] 사진대지 하단 잘림 해결을 위한 규격 고정 */
         #pdf-template { 
-            display: none; width: 794px; min-height: 1120px; padding: 40px 40px 60px 40px; 
-            background: white; font-family: 'Malgun Gothic', sans-serif; box-sizing: border-box; margin: 0 auto; 
+            display: none; 
+            width: 794px; 
+            height: 1122px; /* A4 정규 높이 고정 */
+            padding: 40px; 
+            background: white; 
+            font-family: 'Malgun Gothic', sans-serif; 
+            box-sizing: border-box; 
+            margin: 0 auto; 
+            overflow: hidden; /* 페이지 넘침 방지 */
+            position: relative;
         }
         
         #generating-badge { display: none; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--primary-dark); color: white; padding: 14px 28px; border-radius: 30px; font-weight: 800; z-index: 10000; box-shadow: 0 10px 30px rgba(0,0,0,0.3); font-size: 16px; white-space: nowrap; }
@@ -110,7 +118,7 @@
 <header>
     <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
         <img src="logo.png" alt="METRO" style="height: 24px; border-radius: 4px;" onerror="this.src='https://placehold.co/100x30/0f172a/white?text=METRO+R%26S'">
-        <span>(주)METRO R&S 현장관리 시스템 V8.0</span>
+        <span>(주)METRO R&S 현장관리 시스템 V8.1</span>
     </div>
 </header>
 
@@ -189,13 +197,13 @@
     </div>
 </div>
 
-<!-- PDF 템플릿 -->
+<!-- PDF 템플릿 (하단 잘림 방지 최적화) -->
 <div id="pdf-template">
-    <p style="text-align: center; font-size: 26px; font-weight: 900; margin-top: 0; margin-bottom: 25px; letter-spacing: 15px; font-family: 'Malgun Gothic', sans-serif;">사 진 대 지</p>
-    <table style="width:100%; border-collapse:collapse; border:2px solid #000; font-size:14px;">
+    <p style="text-align: center; font-size: 26px; font-weight: 900; margin-top: 0; margin-bottom: 20px; letter-spacing: 15px; font-family: 'Malgun Gothic', sans-serif;">사 진 대 지</p>
+    <table style="width:100%; border-collapse:collapse; border:2px solid #000; font-size:14px; table-layout: fixed;">
         <tr style="height: 40px;">
             <td style="border:1px solid #000; padding:10px; background:#f4f4f4; font-weight:bold; width:15%; text-align:center;">현장명</td>
-            <td id="pdf-site" colspan="3" style="border:1px solid #000; padding:10px; text-align:center; font-weight:bold;"></td>
+            <td id="pdf-site" colspan="3" style="border:1px solid #000; padding:10px; text-align:center; font-weight:bold; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"></td>
         </tr>
         <tr style="height: 40px;">
             <td id="pdf-unit-label" style="border:1px solid #000; padding:10px; background:#f4f4f4; font-weight:bold; width:15%; text-align:center;">동/호</td>
@@ -204,7 +212,7 @@
             <td id="pdf-loc" style="border:1px solid #000; padding:10px; width:35%; text-align:left;"></td>
         </tr>
         <tr style="height: 40px;">
-            <td id="pdf-unit-label" style="border:1px solid #000; padding:10px; background:#f4f4f4; font-weight:bold; text-align:center;">공종</td>
+            <td id="pdf-work-label" style="border:1px solid #000; padding:10px; background:#f4f4f4; font-weight:bold; text-align:center;">공종</td>
             <td id="pdf-work" style="border:1px solid #000; padding:10px; text-align:left;"></td>
             <td style="border:1px solid #000; padding:10px; background:#f4f4f4; font-weight:bold; text-align:center;">시공업체</td>
             <td id="pdf-contractor" style="border:1px solid #000; padding:10px; text-align:left;"></td>
@@ -213,9 +221,9 @@
             <td style="border:1px solid #000; padding:10px; background:#f4f4f4; font-weight:bold; text-align:center;">일자</td>
             <td id="pdf-date" colspan="3" style="border:1px solid #000; padding:10px; text-align:left;"></td>
         </tr>
-        <tr>
+        <tr style="height: 60px;">
             <td style="border:1px solid #000; padding:10px; background:#f4f4f4; font-weight:bold; text-align:center;">내용</td>
-            <td id="pdf-desc" colspan="3" style="border:1px solid #000; padding:10px; vertical-align:top; height:60px;"></td>
+            <td id="pdf-desc" colspan="3" style="border:1px solid #000; padding:10px; vertical-align:top; height:60px; word-break: break-all;"></td>
         </tr>
         <tr>
             <td colspan="4" style="border:1px solid #000; padding: 15px 0; text-align: center; vertical-align: middle; height: 350px;">
@@ -354,7 +362,6 @@
 
     function proc(input, pId, tId) {
         if(input.files && input.files[0]) {
-            // 💡 p3(완료확인서)인 경우 워터마크 선택 팝업 생략 및 워터마크 미적용
             let applyWm = false;
             if (pId !== 'p3') {
                 applyWm = confirm("📷 사진에 현장 정보(워터마크)를 추가하시겠습니까?\n\n[확인] 워터마크 표기\n[취소] 원본 사진 유지");
@@ -486,7 +493,7 @@
                 document.getElementById('pdf-loc').innerText = d.loc; document.getElementById('pdf-work').innerText = d.work; document.getElementById('pdf-contractor').innerText = d.contractor; document.getElementById('pdf-date').innerText = d.date; document.getElementById('pdf-desc').innerText = d.desc; document.getElementById('pdf-p1').src = d.p1 || ""; document.getElementById('pdf-p2').src = d.p2 || "";
                 const el = document.getElementById('pdf-template'); el.style.display = 'block'; await new Promise(resolve => setTimeout(resolve, 600)); 
                 
-                // 💡 [V8.0 수정] html2canvas 렌더링 폭 고정 (windowWidth: 794)
+                // 💡 [V8.1 수정] 렌더링 폭 및 페이지 넘침 방지 설정 고정
                 const pdf = await html2pdf().set({ 
                     margin: 0, 
                     html2canvas: { scale: 2, useCORS: true, windowWidth: 794 }, 
