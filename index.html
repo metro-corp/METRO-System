@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <title>(주)METRO R&S 현장관리 시스템 V7.4</title>
+    <title>(주)METRO R&S 현장관리 시스템 V7.5</title>
     
     <script>
         var userAgent = navigator.userAgent.toLowerCase();
@@ -35,7 +35,7 @@
         }
 
         body { font-family: 'Pretendard', sans-serif; margin: 0; background: var(--bg-body); font-size: 15px; color: var(--text-main); padding-bottom: 60px; line-height: 1.5; -webkit-tap-highlight-color: transparent; }
-        header { background: linear-gradient(135deg, var(--primary-dark), var(--primary-light)); color: white; padding: 18px; font-weight: 700; text-align: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-size: 17px; }
+        header { background: linear-gradient(135deg, --primary-dark, --primary-light); color: white; padding: 18px; font-weight: 700; text-align: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-size: 17px; }
         .container { padding: 15px; max-width: 800px; margin: auto; }
         .section { background: var(--surface); padding: 24px; border-radius: 20px; margin-bottom: 20px; box-shadow: var(--shadow-soft); border: 1px solid rgba(255,255,255,0.8); }
         .section-title { font-weight: 800; color: var(--primary-dark); margin-bottom: 18px; display: flex; align-items: center; gap: 8px; font-size: 16px; border-bottom: 2px solid var(--border-light); padding-bottom: 12px; }
@@ -105,7 +105,7 @@
 <header>
     <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
         <img src="logo.png" alt="METRO" style="height: 24px; border-radius: 4px;" onerror="this.src='https://placehold.co/100x30/0f172a/white?text=METRO+R%26S'">
-        <span>(주)METRO R&S 현장관리 시스템 V7.4</span>
+        <span>(주)METRO R&S 현장관리 시스템 V7.5</span>
     </div>
 </header>
 
@@ -227,7 +227,8 @@
 </div>
 
 <script>
-    const MY_GAS_URL = "https://script.google.com/macros/s/AKfycbyE1jMEzrix8xYu3_lgHUX8Oqm6TAtWP6RDZzZ2WFL9c6Crlz5BFTO7__JoFyg*RwUD/exec"; 
+    // 💡 [V7.5 수정] 서버 URL 오타 수정 (JoFyg*RwUD -> JoFygqRwUD)
+    const MY_GAS_URL = "https://script.google.com/macros/s/AKfycbyE1jMEzrix8xYu3_lgHUX8Oqm6TAtWP6RDZzZ2WFL9c6Crlz5BFTO7__JoFygqRwUD/exec"; 
     
     let cloudDB = {}; let currentSid = ""; let savedList = [];
     let editingIndex = -1; let isProcessingImage = false; 
@@ -485,7 +486,6 @@
             document.querySelector('.container').style.display = 'block'; document.querySelector('header').style.display = 'block'; document.getElementById('generating-badge').style.display = 'none';
             if(j.result==='success') { 
                 showMsg("🎉 성공적으로 전송되었습니다!"); 
-                // 💡 [V7.4 핵심 개선] 최종 전송 성공 시 목록에서 해당 항목 자동 삭제
                 if (editingIndex > -1) { 
                     savedList.splice(editingIndex, 1); 
                     localStorage.setItem('metro_savedList', JSON.stringify(savedList)); 
