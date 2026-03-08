@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <title>(주)METRO R&S 현장관리 시스템 V7.5</title>
+    <title>(주)METRO R&S 현장관리 시스템 V7.6</title>
     
     <script>
         var userAgent = navigator.userAgent.toLowerCase();
@@ -35,7 +35,10 @@
         }
 
         body { font-family: 'Pretendard', sans-serif; margin: 0; background: var(--bg-body); font-size: 15px; color: var(--text-main); padding-bottom: 60px; line-height: 1.5; -webkit-tap-highlight-color: transparent; }
-        header { background: linear-gradient(135deg, --primary-dark, --primary-light); color: white; padding: 18px; font-weight: 700; text-align: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-size: 17px; }
+        
+        /* 💡 [V7.6 수정] 겹침 방지를 위해 sticky 제거 및 배경색 명시 */
+        header { background: linear-gradient(135deg, var(--primary-dark), var(--primary-light)); color: white; padding: 18px; font-weight: 700; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-size: 17px; }
+        
         .container { padding: 15px; max-width: 800px; margin: auto; }
         .section { background: var(--surface); padding: 24px; border-radius: 20px; margin-bottom: 20px; box-shadow: var(--shadow-soft); border: 1px solid rgba(255,255,255,0.8); }
         .section-title { font-weight: 800; color: var(--primary-dark); margin-bottom: 18px; display: flex; align-items: center; gap: 8px; font-size: 16px; border-bottom: 2px solid var(--border-light); padding-bottom: 12px; }
@@ -77,7 +80,8 @@
         th:first-child { border-top-left-radius: 12px; } th:last-child { border-top-right-radius: 12px; }
         tr:last-child td { border-bottom: none; }
         
-        .action-btn { background: #e2e8f0; color: var(--primary-dark); padding: 6px 10px; border-radius: 8px; font-size: 12px; font-weight: 700; border: none; cursor: pointer; transition: all 0.2s; flex: 1; white-space: nowrap; word-break: keep-all; }
+        /* 💡 [V7.6 디자인 복구] 목록 내 버튼 스타일을 V5.7 사양으로 원복 */
+        .action-btn { background: #e2e8f0; color: var(--primary-dark); padding: 8px 12px; border-radius: 12px; font-size: 13px; font-weight: 800; border: none; cursor: pointer; transition: all 0.2s; flex: 1; white-space: nowrap; word-break: keep-all; }
         .action-btn.del { background: #fee2e2; color: var(--danger); }
 
         #pdf-template { display: none; width: 794px; height: 1122px; padding: 40px 40px 80px 40px; background: white; font-family: 'Malgun Gothic', sans-serif; box-sizing: border-box; margin: 0 auto; }
@@ -105,7 +109,7 @@
 <header>
     <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
         <img src="logo.png" alt="METRO" style="height: 24px; border-radius: 4px;" onerror="this.src='https://placehold.co/100x30/0f172a/white?text=METRO+R%26S'">
-        <span>(주)METRO R&S 현장관리 시스템 V7.5</span>
+        <span>(주)METRO R&S 현장관리 시스템 V7.6</span>
     </div>
 </header>
 
@@ -227,7 +231,6 @@
 </div>
 
 <script>
-    // 💡 [V7.5 수정] 서버 URL 오타 수정 (JoFyg*RwUD -> JoFygqRwUD)
     const MY_GAS_URL = "https://script.google.com/macros/s/AKfycbyE1jMEzrix8xYu3_lgHUX8Oqm6TAtWP6RDZzZ2WFL9c6Crlz5BFTO7__JoFygqRwUD/exec"; 
     
     let cloudDB = {}; let currentSid = ""; let savedList = [];
@@ -490,7 +493,9 @@
                     savedList.splice(editingIndex, 1); 
                     localStorage.setItem('metro_savedList', JSON.stringify(savedList)); 
                 }
-                clearInputs(false); updateTable(); 
+                // 💡 [V7.6 수정] 최종 전송 성공 시 세션(현장/공종)을 보존하도록 true 전달
+                clearInputs(true); 
+                updateTable(); 
             } else { showMsg("❌ 서버 오류: " + j.message); }
         } catch(e) { showMsg("❌ 전송 실패"); }
         finally { btn.innerHTML = "🚀 최종 전송"; btn.style.pointerEvents = "auto"; btn.style.opacity = "1"; }
