@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <!-- 💡 버전 업데이트: V9.4 -->
-    <title>(주)METRO R&S 현장관리 시스템 V9.5</title>
+    <!-- 💡 버전 업데이트: V9.6 -->
+    <title>(주)METRO R&S 현장관리 시스템 V9.6</title>
     
     <script>
         var userAgent = navigator.userAgent.toLowerCase();
@@ -35,8 +35,6 @@
         }
 
         body { font-family: 'Pretendard', sans-serif; margin: 0; background: var(--bg-body); font-size: 15px; color: var(--text-main); padding-bottom: 60px; line-height: 1.5; -webkit-tap-highlight-color: transparent; }
-        
-        /* 💡 헤더 스크롤 겹침 방지 사양 유지 */
         header { background: linear-gradient(135deg, var(--primary-dark), var(--primary-light)); color: white; padding: 18px; font-weight: 700; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-size: 17px; }
         
         .container { padding: 15px; max-width: 800px; margin: auto; }
@@ -68,7 +66,6 @@
         .photo-box span { margin-top: 5px; display: inline-block; }
         .preview-img { width: 100%; height: 100%; object-fit: cover; display: none; position: absolute; top: 0; left: 0; z-index: 10; border-radius: 12px; }
 
-        /* 💡 추가 사진 영역 스타일 유지 */
         #extra-photo-container { display: none; margin-top: 15px; border-top: 1.5px dashed var(--border-light); padding-top: 15px; }
         .btn-toggle-extra { width: 100%; padding: 14px; background: #f1f5f9; border: 1.5px solid var(--border-light); border-radius: 14px; color: var(--text-sub); font-weight: 800; font-size: 14px; margin-top: 20px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; transition: all 0.2s; }
         .btn-toggle-extra:hover { background: #e2e8f0; color: var(--primary-dark); }
@@ -109,15 +106,17 @@
 
 <div id="notice-modal">
     <div class="custom-alert-box">
-        <div style="background: var(--accent); color: white; padding: 12px; border-radius: 12px 12px 0 0; margin: -25px -20px 20px; font-weight: 900; font-size: 15px; letter-spacing: 1px;">📢 공지사항 (V9.4)</div>
+        <!-- 💡 공지사항 버전 업데이트: V9.6 -->
+        <div style="background: var(--accent); color: white; padding: 12px; border-radius: 12px 12px 0 0; margin: -25px -20px 20px; font-weight: 900; font-size: 15px; letter-spacing: 1px;">📢 공지사항 (V9.6)</div>
         <div class="custom-alert-msg" id="notice-msg" style="text-align: left; font-size: 14px; font-weight: 600; line-height: 1.7;">
-            1. 현재 버전은 V9.4 입니다.<br>
-            2. 새로고침시 데이터 로딩 시간이 필요합니다.<br>
-            3. 임시저장목록은 10건 정도 가능합니다.<br>
-            4. 전송 속도를 대폭 개선했습니다.<br>
+            1. 현재 버전은 V9.6 입니다.<br>
+            2. 전송 시 오늘 날짜로 자동 동기화되어 전송됩니다.<br>
+            3. 새로고침시 데이터 로딩 시간이 필요합니다.<br>
+            4. 임시저장목록은 10건 정도 가능합니다.<br>
             5. 최종전송 시 네트워크 상태를 확인 바랍니다.<br>
             6. 워터마크 확인 창을 삭제(자동적용)했습니다.<br>
-            7. 추가 사진 9칸(p4~p12) 기능을 지원합니다.
+            7. 추가 사진 9칸(p4~p12) 기능을 지원합니다.<br>
+            8. 전송 속도를 위해 이미지 해상도를 추가 최적화했습니다.
         </div>
         <button class="custom-alert-btn" onclick="closeNotice()">확인 (오늘 하루 안 보기)</button>
     </div>
@@ -128,7 +127,8 @@
 <header>
     <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
         <img src="logo.png" alt="METRO" style="height: 24px; border-radius: 4px;" onerror="this.src='https://placehold.co/100x30/0f172a/white?text=METRO+R%26S'">
-        <span>(주)METRO R&S 현장관리 시스템 V9.5</span>
+        <!-- 💡 상단 헤더 버전 업데이트 -->
+        <span>(주)METRO R&S 현장관리 시스템 V9.6</span>
     </div>
 </header>
 
@@ -193,7 +193,6 @@
 
         <div id="extra-photo-container">
             <div class="photo-area" style="grid-template-columns: repeat(3, 1fr); margin-top:10px;">
-                <!-- 💡 추가 슬롯 4번~12번 -->
                 <script>
                     for(let i=4; i<=12; i++) {
                         document.write(`
@@ -275,9 +274,7 @@
     }
 
     window.onload = async () => { 
-        // 💡 V9.1 개선: 공지사항 즉시 노출
         checkNotice();
-
         const now = new Date();
         const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -378,7 +375,6 @@
 
     function proc(input, pId, tId, label) {
         if(input.files && input.files[0]) {
-            // p3(완료확인서)만 워터마크 예외
             let applyWm = (pId !== 'p3');
 
             isProcessingImage = true; const txt = document.getElementById(tId);
@@ -389,17 +385,15 @@
                     const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
                     let w = img.width, h = img.height;
                     if (pId === 'p3') {
-                        // V8.9 최적화 해상도 (폭 1200)
-                        let max = 1200; if(w > h) { if(w > max) { h *= max/w; w = max; } } else { if(h > max) { w *= max/h; h = max; } }
+                        // 💡 [V9.6 수정] 완료확인서 최대 폭 최적화 (1200 -> 1000)
+                        let max = 1000; if(w > h) { if(w > max) { h *= max/w; w = max; } } else { if(h > max) { w *= max/h; h = max; } }
                         canvas.width = w; canvas.height = h; ctx.drawImage(img, 0, 0, w, h);
-                        // V8.6 고압축 사양 (0.3)
                         document.getElementById(pId).src = canvas.toDataURL('image/jpeg', 0.3); 
                     } else {
-                        // V8.9 최적화 해상도 (1000x750)
+                        // 💡 [V9.6 수정] 이미지 해상도 2차 최적화 (1000x750 -> 800x600)
                         let targetRatio = 4 / 3; let sX = 0, sY = 0, sW = w, sH = h;
                         if (w / h > targetRatio) { sW = h * targetRatio; sX = (w - sW) / 2; } else { sH = w / targetRatio; sY = (h - sH) / 2; }
-                        canvas.width = 1000; canvas.height = 750; ctx.drawImage(img, sX, sY, sW, sH, 0, 0, 1000, 750);
-                        // V8.6 고압축 사양 (0.4)
+                        canvas.width = 800; canvas.height = 600; ctx.drawImage(img, sX, sY, sW, sH, 0, 0, 800, 600);
                         document.getElementById(pId).dataset.raw = canvas.toDataURL('image/jpeg', 0.4);
                         document.getElementById(pId).dataset.wm = applyWm ? "true" : "false";
                         if(applyWm) { document.getElementById(pId).src = addWM(canvas); } else { document.getElementById(pId).src = document.getElementById(pId).dataset.raw; }
@@ -414,14 +408,15 @@
 
     function addWM(c) {
         const ctx = c.getContext('2d'), w = c.width, h = c.height;
-        const boxW = 580, rowH = 40, col1W = 110;
+        // 💡 800x600 해상도에 맞춰 워터마크 박스 크기 자동 비례 조정 (약간 축소)
+        const boxW = 460, rowH = 32, col1W = 90;
         const totalH = rowH * 5;
-        const x = 0, y = h - totalH; // 💡 왼쪽 하단 밀착
+        const x = 0, y = h - totalH; 
 
         ctx.fillStyle = "rgba(255, 255, 255, 0.98)";
         ctx.fillRect(x, y, boxW, totalH);
         ctx.strokeStyle = "#000";
-        ctx.lineWidth = 1.5;
+        ctx.lineWidth = 1.2;
         ctx.strokeRect(x, y, boxW, totalH);
 
         for (let i = 1; i < 5; i++) {
@@ -432,10 +427,10 @@
         const d = getD();
         const labels = ["현 장", "위 치", "내 용", "공 종", "일 자"];
         const values = [d.site || "현장명", (d.ho === "-" ? d.dong : `${d.dong}동 ${d.ho}호`) || "위치", (d.desc.substring(0, 24) + (d.desc.length > 24 ? "..." : "")) || "작업내용", d.work || "공종", d.date || "날짜"];
-        ctx.fillStyle = "#000"; ctx.font = "bold 18px sans-serif"; ctx.textBaseline = "middle";
+        ctx.fillStyle = "#000"; ctx.font = "bold 14px sans-serif"; ctx.textBaseline = "middle";
         labels.forEach((lbl, i) => {
             ctx.textAlign = "center"; ctx.fillText(lbl, x + (col1W / 2), y + (i * rowH) + (rowH / 2));
-            ctx.textAlign = "left"; ctx.fillText(values[i], x + col1W + 15, y + (i * rowH) + (rowH / 2));
+            ctx.textAlign = "left"; ctx.fillText(values[i], x + col1W + 12, y + (i * rowH) + (rowH / 2));
         });
         return c.toDataURL('image/jpeg', 0.5);
     }
@@ -457,7 +452,7 @@
     }
 
     function saveLocal() {
-        if(isProcessingImage) return showMsg("⏳ 아이폰 사진 처리가 진행 중입니다.");
+        if(isProcessingImage) return showMsg("⏳ 사진 처리가 진행 중입니다.");
         const d = getD(); if(!currentSid || !d.dong || !d.ho || !d.work) return showMsg("🚨 필수 정보를 입력하세요.");
         if (editingIndex > -1) { savedList[editingIndex] = d; } else { savedList.push(d); }
         localStorage.setItem('metro_savedList', JSON.stringify(savedList)); updateTable(); clearInputs(true); 
@@ -523,7 +518,7 @@
 
     async function send() {
         if(isProcessingImage) return showMsg("⏳ 사진 처리가 진행 중입니다.");
-        const d = getD(); if(!currentSid || !d.dong || !d.ho || !d.work) return showMsg("🚨 필수 정보 누락!");
+        const d_init = getD(); if(!currentSid || !d_init.dong || !d_init.ho || !d_init.work) return showMsg("🚨 필수 정보 누락!");
         
         const btn = document.getElementById('btn-send'); 
         btn.innerHTML = "⏳ 전송 중..."; 
@@ -531,6 +526,14 @@
         document.getElementById('generating-badge').style.display = 'block';
         
         try {
+            const d = getD(); 
+            // 💡 V9.5 핵심: 전송 시 오늘 날짜로 자동 동기화
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            d.date = `${year}-${month}-${day}`; 
+
             const payload = { 
                 targetSheetId: currentSid, record: d, pdfBase64: "", 
                 p1Base64: (d.p1||"").split(',')[1]||"", p1RawBase64: (d.p1_wm === "true") ? (d.p1_raw||"").split(',')[1]||"" : "", 
