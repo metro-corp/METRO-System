@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <!-- 💡 버전 업데이트: V9.6 -->
-    <title>(주)METRO R&S 현장관리 시스템 V9.6</title>
+    <!-- 💡 버전 업데이트: V9.8 (공지사항 제거본) -->
+    <title>(주)METRO R&S 현장관리 시스템 V9.8</title>
     
     <script>
         var userAgent = navigator.userAgent.toLowerCase();
@@ -87,24 +87,32 @@
 
         #generating-badge { display: none; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--primary-dark); color: white; padding: 14px 28px; border-radius: 30px; font-weight: 800; z-index: 10000; box-shadow: 0 10px 30px rgba(0,0,0,0.3); font-size: 16px; white-space: nowrap; }
 
-        #custom-alert, #notice-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 10005; backdrop-filter: blur(3px); justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; opacity: 0; transition: opacity 0.2s ease; }
-        #custom-alert.show, #notice-modal.show { display: flex; opacity: 1; }
+        /* 💡 공지사항 스타일 제거됨 (V9.8) */
+        #custom-alert { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 10005; backdrop-filter: blur(3px); justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; opacity: 0; transition: opacity 0.2s ease; }
+        #custom-alert.show { display: flex; opacity: 1; }
         .custom-alert-box { background: white; padding: 25px 20px 20px; border-radius: 20px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.2); max-width: 320px; width: 100%; transform: translateY(20px) scale(0.95); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; }
-        #custom-alert.show .custom-alert-box, #notice-modal.show .custom-alert-box { transform: translateY(0) scale(1); }
+        #custom-alert.show .custom-alert-box { transform: translateY(0) scale(1); }
         .custom-alert-msg { font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 22px; line-height: 1.5; white-space: pre-wrap; word-break: keep-all; }
         .custom-alert-btn { background: var(--accent); color: white; border: none; padding: 14px 0; width: 100%; border-radius: 12px; font-size: 16px; font-weight: 800; cursor: pointer; transition: background 0.2s; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2); }
     </style>
 </head>
 <body>
 
+<div id="custom-alert">
+    <div class="custom-alert-box">
+        <div class="custom-alert-msg" id="alert-msg">메시지 내용</div>
+        <button class="custom-alert-btn" onclick="closeAlert()">확인</button>
+    </div>
+</div>
+
+<!-- 💡 공지사항 모달창 구조 완전 제거 (V9.8) -->
 
 <div id="generating-badge">🚀 전송 중...</div>
 
 <header>
     <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
         <img src="logo.png" alt="METRO" style="height: 24px; border-radius: 4px;" onerror="this.src='https://placehold.co/100x30/0f172a/white?text=METRO+R%26S'">
-        <!-- 💡 상단 헤더 버전 업데이트 -->
-        <span>(주)METRO R&S 현장관리 시스템 V9.6</span>
+        <span>(주)METRO R&S 현장관리 시스템 V9.8</span>
     </div>
 </header>
 
@@ -206,7 +214,6 @@
 
     function toggleExtraPhotos() {
         const container = document.getElementById('extra-photo-container');
-        const icon = document.getElementById('toggle-icon');
         const btnText = document.getElementById('btn-toggle-extra');
         if (container.style.display === 'block') {
             container.style.display = 'none';
@@ -231,26 +238,11 @@
     function showMsg(msg) { document.getElementById('alert-msg').innerText = msg; const alertEl = document.getElementById('custom-alert'); alertEl.style.display = 'flex'; setTimeout(() => alertEl.classList.add('show'), 10); }
     function closeAlert() { const alertEl = document.getElementById('custom-alert'); alertEl.classList.remove('show'); setTimeout(() => alertEl.style.display = 'none', 200); }
 
-    function checkNotice() {
-        const lastDate = localStorage.getItem('metro_notice_date');
-        const today = new Date().toISOString().split('T')[0];
-        if (lastDate !== today) {
-            const noticeEl = document.getElementById('notice-modal');
-            noticeEl.style.display = 'flex';
-            setTimeout(() => noticeEl.classList.add('show'), 10);
-        }
-    }
-
-    function closeNotice() {
-        const today = new Date().toISOString().split('T')[0];
-        localStorage.setItem('metro_notice_date', today);
-        const noticeEl = document.getElementById('notice-modal');
-        noticeEl.classList.remove('show');
-        setTimeout(() => noticeEl.style.display = 'none', 200);
-    }
+    // 💡 공지사항 관련 체크 및 닫기 함수 제거됨 (V9.8)
 
     window.onload = async () => { 
-        checkNotice();
+        // 💡 공지사항 호출 제거됨
+
         const now = new Date();
         const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -361,12 +353,10 @@
                     const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
                     let w = img.width, h = img.height;
                     if (pId === 'p3') {
-                        // 💡 [V9.6 수정] 완료확인서 최대 폭 최적화 (1200 -> 1000)
                         let max = 1000; if(w > h) { if(w > max) { h *= max/w; w = max; } } else { if(h > max) { w *= max/h; h = max; } }
                         canvas.width = w; canvas.height = h; ctx.drawImage(img, 0, 0, w, h);
                         document.getElementById(pId).src = canvas.toDataURL('image/jpeg', 0.3); 
                     } else {
-                        // 💡 [V9.6 수정] 이미지 해상도 2차 최적화 (1000x750 -> 800x600)
                         let targetRatio = 4 / 3; let sX = 0, sY = 0, sW = w, sH = h;
                         if (w / h > targetRatio) { sW = h * targetRatio; sX = (w - sW) / 2; } else { sH = w / targetRatio; sY = (h - sH) / 2; }
                         canvas.width = 800; canvas.height = 600; ctx.drawImage(img, sX, sY, sW, sH, 0, 0, 800, 600);
@@ -384,7 +374,6 @@
 
     function addWM(c) {
         const ctx = c.getContext('2d'), w = c.width, h = c.height;
-        // 💡 800x600 해상도에 맞춰 워터마크 박스 크기 자동 비례 조정 (약간 축소)
         const boxW = 460, rowH = 32, col1W = 90;
         const totalH = rowH * 5;
         const x = 0, y = h - totalH; 
@@ -503,7 +492,6 @@
         
         try {
             const d = getD(); 
-            // 💡 V9.5 핵심: 전송 시 오늘 날짜로 자동 동기화
             const now = new Date();
             const year = now.getFullYear();
             const month = String(now.getMonth() + 1).padStart(2, '0');
