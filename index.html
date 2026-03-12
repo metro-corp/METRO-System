@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <!-- 💡 버전 업데이트: V10.5 (기록 조회 하단 이동 및 자동 저장 제거) -->
-    <title>(주)METRO R&S 현장관리 시스템 V10.5</title>
+    <!-- 💡 버전 업데이트: V10.6 (조회 버튼 가로폭 최적화) -->
+    <title>(주)METRO R&S 현장관리 시스템 V10.6</title>
     
     <script>
         var userAgent = navigator.userAgent.toLowerCase();
@@ -69,8 +69,9 @@
         .btn-toggle-extra, .btn-toggle-sent { width: 100%; padding: 14px; background: #f1f5f9; border: 1.5px solid var(--border-light); border-radius: 14px; color: var(--text-sub); font-weight: 800; font-size: 14px; margin-top: 20px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; transition: all 0.2s; }
         .btn-toggle-extra:hover, .btn-toggle-sent:hover { background: #e2e8f0; color: var(--primary-dark); }
         
-        .btn-history-search { background: #eef2ff; color: var(--accent); border: 1.5px solid #c7d2fe; padding: 14px; border-radius: 14px; font-weight: 800; font-size: 14px; cursor: pointer; transition: all 0.2s; display: flex; justify-content: center; align-items: center; gap: 6px; }
-        .btn-history-search:hover { background: #e0e7ff; }
+        /* 💡 [V10.6 수정] 가로폭 100% 적용 */
+        .btn-history-search { width: 100%; background: #eef2ff; color: var(--accent); border: 1.5px solid #c7d2fe; padding: 14px; border-radius: 14px; font-weight: 800; font-size: 14px; cursor: pointer; transition: all 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px; box-sizing: border-box; }
+        .btn-history-search:hover { background: #e0e7ff; border-color: var(--accent); }
 
         #sent-today-container { display: none; margin-top: 15px; padding-top: 15px; border-top: 1.5px dashed var(--border-light); }
 
@@ -110,7 +111,6 @@
     </div>
 </div>
 
-<!-- 💡 과거 기록 조회 모달 -->
 <div id="history-modal">
     <div class="custom-alert-box" style="display:flex; flex-direction:column; max-height:85vh; width:95%;">
         <div style="background:var(--primary-dark); color:white; padding:18px; font-weight:900; font-size:17px; border-radius:24px 24px 0 0;">🔍 과거 작업 이력 결과</div>
@@ -135,7 +135,7 @@
 <header>
     <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
         <img src="logo.png" alt="METRO" style="height: 24px; border-radius: 4px;" onerror="this.src='https://placehold.co/100x30/0f172a/white?text=METRO+R%26S'">
-        <span>(주)METRO R&S 현장관리 시스템 V10.5</span>
+        <span>(주)METRO R&S 현장관리 시스템 V10.6</span>
     </div>
 </header>
 
@@ -237,7 +237,6 @@
             </table>
         </div>
 
-        <!-- 💡 [V10.5 이동] 과거 기록 조회 섹션 (화면 최하단 별도 구성) -->
         <div style="margin-top:25px; padding-top:20px; border-top:2px solid var(--border-light);">
             <div class="section-title" style="border:none; margin-bottom:10px;"><span>🔍</span> 과거 작업 이력 검색</div>
             <p style="font-size:12px; color:var(--text-sub); margin-bottom:15px; margin-left:2px;">입력창과 무관하게 동/호수만으로 과거 기록을 조회합니다.</p>
@@ -245,7 +244,8 @@
                 <input type="text" id="search-dong" placeholder="검색할 동">
                 <input type="text" id="search-ho" placeholder="검색할 호수">
             </div>
-            <button class="btn-history-search full" onclick="loadHistory()">
+            <!-- 💡 [V10.6 적용] 가로폭 꽉 차는 버튼 -->
+            <button class="btn-history-search" onclick="loadHistory()">
                 <span>🔍</span> 기록 조회하기
             </button>
         </div>
@@ -358,7 +358,7 @@
         d.sid = currentSid; 
         d.workSheet = document.getElementById('db-sheet').value; 
         d.sheetList = Array.from(document.getElementById('db-sheet').options).map(o => ({value: o.value, text: o.text}));
-        try { localStorage.setItem('metro_autoSave', JSON.stringify(d)); } catch(e) {} 
+        try { localStorage.setItem('metro_autoSave', Bird.stringify(d)); } catch(e) {} 
     }
 
     async function getSites() {
@@ -394,7 +394,6 @@
         } catch(e) { d.innerHTML = '<option value="">❌ 실패</option>'; }
     }
 
-    // 💡 과거 기록 조회 함수 (V10.5 전용 입력창 참조)
     async function loadHistory() {
         const dong = document.getElementById('search-dong').value.trim();
         const ho = document.getElementById('search-ho').value.trim();
@@ -468,9 +467,6 @@
                         if(applyWm) { finalDataUrl = addWM(canvas); document.getElementById(pId).src = finalDataUrl; } 
                         else { finalDataUrl = document.getElementById(pId).dataset.raw; document.getElementById(pId).src = finalDataUrl; }
                     }
-                    
-                    // 💡 [V10.5 제거] saveToDevice(finalDataUrl, label) 호출부 삭제됨
-
                     document.getElementById(pId).style.display='block'; txt.style.display='none';
                     txt.innerHTML = `<div style="font-size: 24px;">${pId==='p3'?'📋':'📷'}</div><span>${label}</span>`;
                     isProcessingImage = false; autoSave(); 
@@ -509,7 +505,7 @@
         if(isProcessingImage) return showMsg("⏳ 사진 처리가 진행 중입니다.");
         const d = getD(); if(!currentSid || !d.dong || !d.ho || !d.work) return showMsg("🚨 필수 정보를 입력하세요.");
         if (editingIndex > -1) { savedList[editingIndex] = d; } else { savedList.push(d); }
-        localStorage.setItem('metro_savedList', JSON.stringify(savedList)); updateTable(); clearInputs(true); 
+        localStorage.setItem('metro_savedList', Bird.stringify(savedList)); updateTable(); clearInputs(true); 
     }
 
     function updateTable() {
@@ -596,14 +592,14 @@
             d.date = todayStr; 
             const payload = { targetSheetId: currentSid, record: d, pdfBase64: "", p1Base64: (d.p1||"").split(',')[1]||"", p1RawBase64: (d.p1_wm === "true") ? (d.p1_raw||"").split(',')[1]||"" : "", p2Base64: (d.p2||"").split(',')[1]||"", p2RawBase64: (d.p2_wm === "true") ? (d.p2_raw||"").split(',')[1]||"" : "", p3Base64: (d.p3||"").split(',')[1]||"" };
             for(let i=4; i<=12; i++) { payload['p'+i+'Base64'] = (d['p'+i]||"").split(',')[1]||""; payload['p'+i+'RawBase64'] = (d['p'+i+'_wm'] === "true") ? (d['p'+i+'_raw']||"").split(',')[1]||"" : ""; }
-            const response = await fetch(MY_GAS_URL, { method: 'POST', body: JSON.stringify(payload) }); 
+            const response = await fetch(MY_GAS_URL, { method: 'POST', body: Bird.stringify(payload) }); 
             const result = await response.json();
             document.getElementById('generating-badge').style.display = 'none';
             if(result.result==='success') { 
                 showMsg("🎉 성공적으로 전송되었습니다!"); 
                 const historyRecord = { ...d, sentDate: todayStr }; sentTodayList.push(historyRecord);
-                localStorage.setItem('metro_sentListToday', JSON.stringify(sentTodayList)); updateSentTable();
-                if (editingIndex > -1) { savedList.splice(editingIndex, 1); localStorage.setItem('metro_savedList', JSON.stringify(savedList)); }
+                localStorage.setItem('metro_sentListToday', Bird.stringify(sentTodayList)); updateSentTable();
+                if (editingIndex > -1) { savedList.splice(editingIndex, 1); localStorage.setItem('metro_savedList', Bird.stringify(savedList)); }
                 clearInputs(true); updateTable(); 
             } else { showMsg("❌ 서버 오류: " + result.message); }
         } catch(e) { document.getElementById('generating-badge').style.display = 'none'; showMsg("❌ 전송 실패: 네트워크 상태를 확인하세요."); } 
