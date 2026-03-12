@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <!-- 💡 버전 업데이트: V10.1 (사진 기기 자동 저장 기능 추가) -->
-    <title>(주)METRO R&S 현장관리 시스템 V10.1</title>
+    <!-- 💡 버전 업데이트: V10.2 (전송 완료 목록 상세보기 버튼 제거) -->
+    <title>(주)METRO R&S 현장관리 시스템 V10.2</title>
     
     <script>
         var userAgent = navigator.userAgent.toLowerCase();
@@ -112,7 +112,7 @@
 <header>
     <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
         <img src="logo.png" alt="METRO" style="height: 24px; border-radius: 4px;" onerror="this.src='https://placehold.co/100x30/0f172a/white?text=METRO+R%26S'">
-        <span>(주)METRO R&S 현장관리 시스템 V10.1</span>
+        <span>(주)METRO R&S 현장관리 시스템 V10.2</span>
     </div>
 </header>
 
@@ -209,8 +209,9 @@
 
         <div id="sent-today-container">
             <table>
-                <thead><tr><th style="width:10%">No</th><th style="width:50%">전송 완료 내역</th><th style="width:40%">상태</th></tr></thead>
-                <tbody id="sent-list-body"><tr><td colspan="3" style="padding:20px; color:var(--text-sub); font-size:13px;">오늘 전송된 내역이 없습니다.</td></tr></tbody>
+                <!-- 💡 [V10.2 수정] 상태 열 제거 및 너비 조정 -->
+                <thead><tr><th style="width:20%">No</th><th style="width:80%">오늘의 전송 내역</th></tr></thead>
+                <tbody id="sent-list-body"><tr><td colspan="2" style="padding:20px; color:var(--text-sub); font-size:13px;">오늘 전송된 내역이 없습니다.</td></tr></tbody>
             </table>
         </div>
     </div>
@@ -401,7 +402,6 @@
                         }
                     }
                     
-                    // 💡 [V10.1 핵심] 사진 기기 저장 로직 실행 (완료확인서 제외)
                     if (pId !== 'p3') {
                         saveToDevice(finalDataUrl, label);
                     }
@@ -414,7 +414,6 @@
         }
     }
 
-    // 💡 [V10.1 추가] 스마트폰 기기 저장(다운로드) 함수
     function saveToDevice(dataUrl, label) {
         const d = getD();
         const site = d.site || "현장";
@@ -499,6 +498,7 @@
         document.getElementById('count').innerText = savedList.length;
     }
 
+    // 💡 [V10.2 수정] 상세보기 버튼 및 상태 열 제거
     function updateSentTable() {
         const b = document.getElementById('sent-list-body');
         const countEl = document.getElementById('sent-count');
@@ -507,13 +507,8 @@
             return `<tr><td style="font-weight:700; color:var(--text-sub);">${i+1}</td>
                 <td style="text-align:left; padding-left:10px; word-break:keep-all; white-space:nowrap;">
                     <span style="font-weight:700;">${locText}</span><span style="color:var(--success); font-weight:700; font-size:12px; background:#ecfdf5; padding:2px 6px; border-radius:4px; margin-left:4px;">${r.work}</span>
-                </td>
-                <td style="padding-left:4px; padding-right:4px;">
-                    <div style="display:flex; gap:4px; justify-content:center;">
-                        <button class="action-btn view" onclick="loadSent(${i})">상세보기</button>
-                    </div>
                 </td></tr>`;
-        }).reverse().join('') : '<tr><td colspan="3" style="padding:20px; color:var(--text-sub); font-size:13px;">오늘 전송된 내역이 없습니다.</td></tr>';
+        }).reverse().join('') : '<tr><td colspan="2" style="padding:20px; color:var(--text-sub); font-size:13px;">오늘 전송된 내역이 없습니다.</td></tr>';
         countEl.innerText = sentTodayList.length;
     }
     
@@ -523,11 +518,7 @@
         document.querySelector('.btn-save').innerHTML = "💾 수정 저장"; 
     }
 
-    async function loadSent(i) {
-        const d = sentTodayList[i];
-        await loadDataToForm(d);
-        showMsg("ℹ️ 이 내역은 이미 전송이 완료된 작업입니다.");
-    }
+    // 💡 [V10.2 제거] loadSent 함수는 더 이상 사용되지 않으므로 삭제
 
     async function loadDataToForm(d) {
         if (d.sid) {
